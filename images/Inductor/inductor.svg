@@ -1,0 +1,8 @@
+<svg width="120" height="120" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-tabler icon-tabler-circuit-inductor">
+ <g>
+  <title>Layer 1</title>
+  <path stroke="null" stroke-width="5" id="svg_2" d="m-3.49999,59.50841l19.35,0l0,-14.50216a12.9,14.50216 0 1 1 25.8,0l0,14.50216l0,-10.87661a16.125,18.12769 0 1 1 32.25,0l0,10.87661l0,-10.87661a16.125,18.12769 0 1 1 32.25,0l0,10.87661l19.35,0"/>
+  <ellipse ry="13.5" rx="13.5" id="svg_3" cy="124" cx="198.5" stroke-width="10" stroke="null"/>
+ </g>
+
+</svg>

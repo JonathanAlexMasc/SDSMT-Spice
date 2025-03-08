@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation</title>
+    <link rel="stylesheet" href="documentation.css">
+</head>
+<body>
+    <div class="horizontalControls">
+        <div class="left-controls">
+            <button id="build-home" onclick="window.location.href='index.html'">Home</button>
+        </div>
+    </div>
+    <div class="doc-header" id="doc-header">
+        <h1>SDM_SPICE</h1>
+        <p>Author: Nathan Divis</p>
+        <p>Author: Marc Tchona</p>
+        <p>Author: Nick Wilk</p>
+    </div>
+    <div class="back-to-top-container">
+        <p><a href="#doc-header">Back to top</a></p>
+    </div>
+    <div class="build-functions">Build Functions:
+        <a href="#AddComponent">AddComponent</a>
+        <a href="#updateCoordinates">updateCoordinates</a>
+        <a href="#startDrawingWire">startDrawingWire</a>
+        <a href="#endDrawingWire">endDrawingWire</a>
+        <a href="#generateNetlist">generateNetlist</a>
+        <a href="#saveCircuit">saveCircuit</a>
+        <a href="#loadCircuit">loadCircuit</a>
+        <a href="#clearCircuit">clearCircuit</a>
+        <a href="#SimulateCircuit">SimulateCircuit</a>
+        <a href="#AddGround">addGround</a>
+        <a href="#AddResistor">addResistor</a>
+        <a href="#AddInductor">addInductor</a>
+        <a href="#AddCapacitor">addCapacitor</a>
+        <a href="#AddVoltage">addVoltage</a>
+    </div>
+
+    <div class="run-functions"> Run Functions:
+        <a href="#addPlotOption">addPlotOptions</a>
+        <a href="#updateAxisScale">updateAxisScale</a>
+        <a href="#plotFromNgspiceOutput">plotFromNgspiceOutput</a>
+        <a href="#syncSliderAndInput">syncSliderAndInput</a>
+        <a href="#updateGraphVals">updateGraphVals</a>
+        <a href="#LinkAmplitude">LinkAmplitude</a>
+        <a href="#LinkFrequency">LinkFrequency</a>
+        <a href="#LinkDCOffset">LinkDCOffset</a>
+        <a href="#EditCircuit">EditCircuit</a>
+        <a href="#validateNetlist">validateNetlist</a>
+    </div>
+
+    <div id="introduction-section">
+        <h2>Introduction</h2>
+        <p>Welcome to the SDM_SPICE documentation. This guide will help you understand how to run and build the application effectively. Below you will find sections dedicated to running and building the application, providing detailed instructions and best practices.</p>
+    </div>
+
+    <div id="run-section">
+        <h2>Run</h2>
+        <p>Details about how to run the application...</p>
+        <!-- Add more content for the Run section here -->
+
+        <h3>Variables</h3>
+    <p>The following variables are used throughout the application:</p>
+    <pre><code>
+var numPoints = 500;
+var xData = [];
+var yData = [];
+var dx = 2 * Math.PI / numPoints;
+
+var data = {
+    frequency: [],
+    dB: []
+};
+
+for (var i = 0; i < numPoints; i++) {
+    xData.push(i * dx);
+    yData.push(Math.sin(i * dx));
+}
+
+var amplitude = 1;
+var frequency = 1;
+var dcOff = 0;
+var selectedShape = 'sine';
+
+let existingChart;
+let chartinitializer = false;
+
+var ctx = document.getElementById('chartCanvas').getContext('2d');
+var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: xData,
+        datasets: [{
+            label: 'Initial Waveform',
+            data: yData,
+            borderColor: '#80CAF6',
+            borderWidth: 1,
+            fill: false,
+            xAxisType: 'linear',
+            yAxisType: 'linear'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Frequency (Hz)'
+                },
+                ticks: {
+                    maxRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 10,
+                    callback: function(value) {
+                        if (value.length > 10) {
+                            return value.substr(0, 10) + '...';
+                        } else {
+                            return value;
+                        }
+                    }
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: '(dB)'
+                }
+            }
+        },
+        animation: false
+    }
+});
+    </code></pre>
+        <h3>Functions</h3>
+    
+        <h4 id="addPlotOption">addPlotOption(plotname)</h4>
+        <p>
+            Adds a new plot option to the plot selection dropdown.
+        </p>
+        <pre><code>
+    function addPlotOption(plotname) {
+        var plotSelect = document.getElementById("plotSelect");
+        var newOption = document.createElement("option");
+        newOption.value = plotname;
+        newOption.text = plotname;
+        plotSelect.appendChild(newOption);
+    }
+        </code></pre>
+    
+        <h4 id="updateAxisScale">updateAxisScale(selectedPlot, selectedAxis, selectedScale)</h4>
+        <p>
+            Updates the scale type of the specified axis (x or y) for the selected plot.
+        </p>
+        <pre><code>
+    function updateAxisScale(selectedPlot, selectedAxis, selectedScale) {
+        var dataset = selectedPlot;
+        if(selectedPlot === 'Signal In') {
+            dataset = chart.data.datasets[0];
+        }
+        if(selectedPlot === 'ngspice Output') {
+            dataset = chart.data.datasets[1];
+        }
+    
+        if (selectedAxis === 'x') {
+            dataset.xAxisType = selectedScale;
+        } else if (selectedAxis === 'y') {
+            dataset.yAxisType = selectedScale;
+        }
+    
+        if (chart && chart.options && chart.options.scales) {
+            if (selectedAxis === 'x') {
+                chart.options.scales.x.type = selectedScale;
+            } else if (selectedAxis === 'y') {
+                chart.options.scales.y.type = selectedScale;
+            }
+            chart.update();
+        }
+    }
+        </code></pre>
+    
+        <h4 id="plotFromNgspiceOutput">plotFromNgspiceOutput(output)</h4>
+        <p>
+            Parses ngspice output and plots the data on the chart.
+        </p>
+        <pre><code>
+    function plotFromNgspiceOutput(output) {
+        const lines = output.split('\n');
+        const data = { frequency: [], dB: [] };
+        let parseData = false;
+    
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line.startsWith('AC Analysis')) {
+                parseData = true;
+                continue;
+            }
+            if (!parseData || line.startsWith('Circuit:') || line.startsWith('Using')) {
+                continue;
+            }
+            const parts = line.split(/\s+/);
+            if (parts.length >= 3) {
+                const frequency = parseFloat(parts[1]);
+                const dB2 = parseFloat(parts[2]);
+                if (!isNaN(frequency) && !isNaN(dB2)) {
+                    data.frequency.push(frequency);
+                    data.dB.push(dB2);
+                }
+            }
+        }
+    
+        console.log(data.dB, data.frequency);
+    
+        chart.data.datasets.push({
+            label: 'ngspice Output',
+            data: data.dB.map((d, i) => ({ x: data.frequency[i], y: d })),
+            borderColor: '#FF5733',
+            borderWidth: .5,
+            fill: false,
+            xAxisID: 'x-axis-2',
+            yAxisID: 'y-axis-1'
+        });
+    
+        chart.options.scales['x-axis-2'] = {
+            title: { display: true, text: 'Frequency (Hz)' },
+            type: 'logarithmic',
+            position: 'top'
+        };
+    
+        addPlotOption("ngspice Output");
+        chart.update();
+    }
+        </code></pre>
+    
+        <h4 id="syncSliderAndInput">syncSliderAndInput(slider, input)</h4>
+        <p>
+            Synchronizes the value of a slider and a text input.
+        </p>
+        <pre><code>
+    function syncSliderAndInput(slider, input) {
+        slider.addEventListener('input', () => {
+            input.value = slider.value;
+        });
+        input.addEventListener('input', () => {
+            slider.value = input.value;
+        });
+    }
+        </code></pre>
+    
+        <h4 id="updateGraphVals">updateGraphVals()</h4>
+        <p>
+            Updates the graph values based on the selected wave shape, amplitude, frequency, and DC offset.
+        </p>
+        <pre><code>
+    function updateGraphVals() {
+        yData = xData.map(function(x) {
+            switch (selectedShape) {
+                case 'sine':
+                    return amplitude * Math.sin(x * frequency + dcOff);
+                case 'square':
+                    return amplitude * (x % (2 * Math.PI) < Math.PI ? 1 : -1);
+                case 'triangle':
+                    var phase = (x * frequency + dcOff) * Math.PI / (frequency / 2);
+                    return 2 * amplitude / Math.PI * Math.abs((((phase % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI)) - Math.PI) - amplitude;
+                case 'sawtooth':
+                    var phase = (x * frequency + dcOff) / (2 * frequency);
+                    return amplitude * (phase - Math.floor(phase));
+                default:
+                    return amplitude * Math.sin(x * frequency + dcOff);
+            }
+        });
+    
+        chart.data.datasets[0].data = yData;
+        chart.update();
+    }
+        </code></pre>
+    
+        <h4 id="LinkAmplitude">LinkAmplitude(slider, input)</h4>
+        <p>
+            Links a slider and input for amplitude and updates the graph.
+        </p>
+        <pre><code>
+    function LinkAmplitude(slider, input) {
+        slider.addEventListener('input', function() {
+            amplitude = this.value;
+        });
+        input.addEventListener('input', function() {
+            amplitude = this.value;
+        });
+        updateGraphVals();
+    }
+        </code></pre>
+    
+        <h4 id="EditCircuit">EditCircuit()</h4>
+        <p>
+            Redirects the user to the circuit editing page.
+        </p>
+        <pre><code>
+    function EditCircuit() {
+        window.location.href = 'build.html';
+    }
+        </code></pre>
+    
+        <h4 id="linkFrequency">linkFrequency(slider, input)</h4>
+        <p>
+            Links a slider and input for frequency and updates the graph.
+        </p>
+        <pre><code>
+    function linkFrequency(slider, input) {
+        slider.addEventListener('input', function() {
+            frequency = this.value;
+        });
+        input.addEventListener('input', function() {
+            frequency = this.value;
+        });
+        updateGraphVals();
+    }
+        </code></pre>
+    
+        <h4 id="linkDCoffset">linkDCoffset(slider, input)</h4>
+        <p>
+            Links a slider and input for DC offset and updates the graph.
+        </p>
+        <pre><code>
+    function linkDCoffset(slider, input) {
+        slider.addEventListener('input', function() {
+            dcOff = this.value;
+        });
+        input.addEventListener('input', function() {
+            dcOff = this.value;
+        });
+        updateGraphVals();
+    }
+        </code></pre>
+    
+        <h4 id="validateNetlist">validateNetlist(fileContent)</h4>
+        <p>
+            Validates the content of a netlist file.
+        </p>
+        <pre><code>
+    function validateNetlist(fileContent) {
+        const lines = fileContent.split('\n').map(line => line.trim());
+        const itemPattern = /^\w+\s+\d+\s+\d+\s+sine\s+\(\s+\d+\s+\d+\s+\d+\s+\)\s+ac\s+\d+$/;
+        const controlPattern = /^\.control$/;
+        const tranPattern = /^tran\s+\d+\s+\d+\s+/;
+        const acPattern = /^ac\s+(dec|lin|oct)\s+\d+\s+\d+\s+\d+$/;
+        const dcPattern = /^dc\s+\w+\s+\d+\s+\d+$/;
+        const printPattern = /^print\s+i\(\w+\)$/;
+        const itemWithValuePattern = /^\w+\s+\d+\s+\d+\s+\w+$/;
+        let inControlSection = false;
+    
+        for (let line of lines) {
+            if (!line || line.startsWith('*')) {
+                continue;
+            }
+            if (!inControlSection && controlPattern.test(line)) {
+                inControlSection = true;
+                continue;
+            }
+            if (inControlSection) {
+                if (tranPattern.test(line) || acPattern.test(line) || dcPattern.test(line) || printPattern.test(line)) {
+                    continue;
+                }
+            } else {
+                if (itemPattern.test(line) || itemWithValuePattern.test(line)) {
+                    continue;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+        </code></pre>
+    
+    </div>
+    
+
+    <div id="build-section">
+        <h2>Build</h2>
+        <p>Details about how to build the application...</p>
+    
+        <h3>Function Documentation</h3>
+
+        <h4 id="DOMContentLoaded">DOMContentLoaded</h4>
+<p>Initializes event listeners and sets up the grid when the DOM content has fully loaded.</p>
+<pre><code>
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loadButton').addEventListener('click', async () => {
+        const { filePath, fileContent } = await window.electron.openFileDialog();
+        if (filePath) {
+            const fileName = filePath.split('\\').pop().split('/').pop();
+            document.getElementById('fileHolder').textContent = fileName;
+            clearCircuit();
+            loadCircuit(fileContent);
+        }
+    });
+    document.getElementById('saveButton').addEventListener('click', saveCircuit);
+    generateGrid();
+});
+</code></pre>
+<p>Details:</p>
+<ul>
+    <li><code>loadButton</code>: Opens a file dialog, updates the displayed file name, clears the current circuit, and loads the new circuit content.</li>
+    <li><code>saveButton</code>: Saves the current state of the circuit.</li>
+    <li><code>generateGrid()</code>: Initializes or refreshes the grid layout.</li>
+</ul>
+
+<h4 id="queryConnections">queryConnections(connections)</h4>
+<p>Determines the type of connection configuration based on the provided connection points.</p>
+<pre><code>
+function queryConnections(connections) {
+    const { connectionA, connectionB, connectionC, connectionD, connectionE, connectionF, connectionG, connectionH } = connections;
+    let trueCount = 0;
+    if (connectionA && connectionB && !connectionC && !connectionD && !connectionE && !connectionF && !connectionG && !connectionH) {
+        return 1; // Case: Only A and B are true
+    } else if (connectionA && !connectionB && !connectionC && !connectionD && !connectionE && !connectionF && !connectionG && !connectionH) {
+        return 2; // Case: Only A is true
+    } else if (!connectionA && !connectionB && connectionC && connectionD && !connectionE && !connectionF && !connectionG && !connectionH) {
+        return 3; // Case: Only C and D are true
+    } else {
+        if (connectionA) trueCount++;
+        if (connectionB) trueCount++;
+        if (connectionC) trueCount++;
+        if (connectionD) trueCount++;
+        if (connectionE) trueCount++;
+        if (connectionF) trueCount++;
+        if (connectionG) trueCount++;
+        if (connectionH) trueCount++;
+        return trueCount; // Default case or other conditions
+    }
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>connections</code>: An object with boolean properties <code>connectionA</code>, <code>connectionB</code>, <code>connectionC</code>, <code>connectionD</code>, <code>connectionE</code>, <code>connectionF</code>, <code>connectionG</code>, <code>connectionH</code>.</li>
+</ul>
+<p>Returns:</p>
+<ul>
+    <li><code>1</code>: If only <code>connectionA</code> and <code>connectionB</code> are true.</li>
+    <li><code>2</code>: If only <code>connectionA</code> is true.</li>
+    <li><code>3</code>: If only <code>connectionC</code> and <code>connectionD</code> are true.</li>
+    <li>Otherwise, returns the count of true connection points.</li>
+</ul>
+
+<h4 id="styleAttachedButton">styleAttachedButton(button)</h4>
+<p>Styles a button to be used as a connector point on the grid.</p>
+<pre><code>
+function styleAttachedButton(button) {
+    button.style.backgroundImage = `url("images/CONNECTOR.svg")`;
+    button.style.backgroundSize = 'cover';
+    button.style.backgroundPosition = 'center';
+    button.style.backgroundColor = "transparent";
+    button.style.border = "none";
+    button.style.position = "absolute";
+    button.style.width = "10px";
+    button.style.height = "10px";
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>button</code>: The button element to be styled.</li>
+</ul>
+
+<h4 id="attachBot">attachBot(button)</h4>
+<p>Positions a button at the bottom of the main button.</p>
+<pre><code>
+function attachBot(button) {
+    button.style.bottom = "-7px";
+    button.style.left = "50%";
+    button.style.transform = "translateX(-45%)";
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>button</code>: The button element to be positioned.</li>
+</ul>
+
+<h4 id="attachTop">attachTop(button)</h4>
+<p>Positions a button at the top of the main button.</p>
+<pre><code>
+function attachTop(button) {
+    button.style.top = "-9px";
+    button.style.left = "50%";
+    button.style.transform = "translateX(-50%)";
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>button</code>: The button element to be positioned.</li>
+</ul>
+
+<h4 id="attachRight">attachRight(button2)</h4>
+<p>Positions a button to the right of the main button.</p>
+<pre><code>
+function attachRight(button2) {
+    button2.style.right = "-10px";
+    button2.style.top = "50%";
+    button2.style.transform = "translateY(-50%)";
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>button2</code>: The button element to be positioned.</li>
+</ul>
+
+<h4 id="attachLeft">attachLeft(button)</h4>
+<p>Positions a button to the left of the main button.</p>
+<pre><code>
+function attachLeft(button) {
+    button.style.left = "-10px";
+    button.style.top = "50%";
+    button.style.transform = "translateY(-50%)";
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>button</code>: The button element to be positioned.</li>
+</ul>
+
+    <h4 id="AddComponent">AddComponent(Button, content)</h4>
+        <p>Adds a component to the grid with a specified button and content.</p>
+        <pre><code>
+            function AddComponent(Button, content) {
+                const componentId = `${content}-${componentIdCounter++}`;
+                componentMap.set(componentId, { Button, connectors: [] });
+                //console.log(componentId);
+            
+                const grid = document.getElementById("grid");
+                const holder = document.createElement("div");
+                holder.className = 'ButtonDiv';
+                holder.style.position = 'absolute';
+                holder.style.top = Button.y;
+                holder.style.left = Button.x;
+                let connectors = [];
+                
+            
+                const button = document.createElement("button");
+                const conA = document.createElement("button");
+                const conB = document.createElement("button");
+                const conC = document.createElement("button");
+                const conD = document.createElement("button");
+                const conE = document.createElement("button");
+                const conF = document.createElement("button");
+                const conG = document.createElement("button");
+                const conH = document.createElement("button");
+                button.id = 'component-button-' + componentId;
+                button.className = "b1 position";
+                button.draggable = true;
+                button.dataset.componentId = componentId;
+                button.style.position = "relative";
+                button.style.backgroundImage = `url(${Button.imgSrc})`;
+                button.style.backgroundSize = "cover";
+                button.style.backgroundPosition = "center";
+                button.style.backgroundColor = "transparent";
+                button.style.border = "none";
+                button.style.width = "60px";
+                button.style.height = "60px";
+                button.style.transform = 'rotate(0deg)'
+            
+                // Create connection points as buttons
+                let conType = queryConnections(Button.connections);
+                if (conType == 1) {
+                    let VoltA = 'VoltA-' + componentId;
+                    let VoltB = 'VoltB-' + componentId;
+                    conA.id = VoltA;
+                    conB.id = VoltB;
+                    conA.className = 'connection-point';
+                    conB.className = 'connection-point';
+                    conA.classList.add('top-connector');
+                    conB.classList.add('bot-connector');
+                    holder.appendChild(conA);
+                    holder.appendChild(conB);
+                    styleAttachedButton(conA);
+                    styleAttachedButton(conB);
+                    attachClickListener(conA, VoltA);
+                    attachClickListener(conB, VoltB);
+                    attachTop(conA);
+                    attachBot(conB);
+                    connectors.push(conA, conB);
+                } else if (conType == 2) {
+                    let gndConnector = 'Ground-' + componentId;
+                    conA.id = gndConnector;
+                    conA.className = 'connection-point';
+                    conA.classList.add('top-connector');
+                    holder.appendChild(conA);
+                    styleAttachedButton(conA);
+                    attachClickListener(conA, gndConnector);
+                    attachTop(conA);
+                    connectors.push(conA);
+                } else if (conType == 3) {
+                    let stdConnectorA = 'StdA-' + componentId;
+                    let stdConnectorB = 'StdB-' + componentId;
+                    conA.id = stdConnectorA;
+                    conB.id = stdConnectorB;
+                    conA.className = 'connection-point';
+                    conB.className = 'connection-point';
+                    conA.classList.add('left-connector');
+                    conB.classList.add('right-connector');
+                    holder.appendChild(conA);
+                    holder.appendChild(conB);
+                    styleAttachedButton(conA);
+                    styleAttachedButton(conB);
+                    attachClickListener(conA, stdConnectorA);
+                    attachClickListener(conB, stdConnectorB);
+                    attachLeft(conA);
+                    attachRight(conB);
+                    connectors.push(conA, conB);
+                }
+            
+                componentMap.get(componentId).connectors = connectors;
+            
+                //console.log(connectors);
+                button.onclick = function() {
+                    handleClickOnComponent(componentId);
+                };
+            
+                holder.appendChild(button);
+                grid.appendChild(holder);
+            
+                button.addEventListener('drag', () => onComponentDrag(button));
+                createFABForComponent(button);
+            
+                // Grab the existing rotate button
+                const rotateButton = document.getElementById(`rotate-${componentId}`);
+                const deleteButton = document.getElementById(`delete-${componentId}`);
+                const clearWiresButton = document.getElementById(`clear-${componentId}`);
+            
+                // Call the fabListener function with the rotate button and connectors
+                fabListener(button, rotateButton, deleteButton, clearWiresButton, connectors, componentId);
+                
+                updateCoordinates();
+                
+                
+            }
+        </code></pre>
+
+        <h4 id="fabListener">fabListener(button, rotateButton, deleteButton, clearWiresButton, connectors, componentId)</h4>
+        <p>Adds event listeners to the floating action buttons (FABs) for rotation, deletion, and clearing wires.</p>
+        <pre><code>
+        function fabListener(button, rotateButton, deleteButton, clearWiresButton, connectors, componentId) {
+            let currentRotation = 0; // Variable to store the current rotation angle
+        
+            if (rotateButton) {
+                rotateButton.addEventListener('click', () => {
+                    // Update the rotation angle
+                    currentRotation = (currentRotation + 90) % 360;
+        
+                    // Rotate the button
+                    button.style.transform = `rotate(${currentRotation}deg)`;
+        
+                    // Update the connectors based on the new rotation angle
+                    updateConnectors(connectors);
+        
+                    // Update wires
+                    // DO NOT PUT UPDATE COORDINATES HERE IT WILL BREAK IT IDK WHY
+                    updateWires(componentId);
+                });
+            }
+            if (deleteButton) {
+                deleteButton.addEventListener('click', () => {
+                    deleteComponent(componentId);
+                });
+            }
+            if (clearWiresButton) {
+                clearWiresButton.addEventListener('click', () => {
+                    clearWiresFromComponent(componentId);
+                });
+            }
+        }
+        </code></pre>
+        <p>Parameters:</p>
+        <ul>
+            <li><code>button</code>: The main button element associated with the component.</li>
+            <li><code>rotateButton</code>: The button element to rotate the main button.</li>
+            <li><code>deleteButton</code>: The button element to delete the component.</li>
+            <li><code>clearWiresButton</code>: The button element to clear wires from the component.</li>
+            <li><code>connectors</code>: Array of connector elements associated with the component.</li>
+            <li><code>componentId</code>: The unique identifier for the component.</li>
+        </ul>
+        
+        <h4 id="deleteComponent">deleteComponent(componentId)</h4>
+        <p>Deletes a component and its connectors from the DOM and removes it from the <code>componentMap</code>.</p>
+        <pre><code>
+        function deleteComponent(componentId) {
+            // Retrieve the component and its connectors
+            const componentData = componentMap.get(componentId);
+            if (!componentData) return;
+        
+            const { Button, connectors } = componentData;
+        
+            // Remove connectors from the DOM
+            connectors.forEach(connector => {
+                if (connector && connector.parentNode) {
+                    connector.parentNode.removeChild(connector);
+                }
+            });
+        
+            // Remove the component button from the DOM
+            const button = document.getElementById('component-button-' + componentId);
+            removeFABForComponent(button);
+            if (button && button.parentNode) {
+                button.parentNode.removeChild(button);
+            }
+        
+            // Remove the component holder (if any)
+            const holder = button ? button.parentNode : null;
+            if (holder && holder.parentNode) {
+                holder.parentNode.removeChild(holder);
+            }
+        
+            componentMap.delete(componentId);
+        }
+        </code></pre>
+        <p>Parameters:</p>
+        <ul>
+            <li><code>componentId</code>: The unique identifier for the component to be deleted.</li>
+        </ul>
+        
+        <h4 id="clearWiresFromComponent">clearWiresFromComponent(componentId)</h4>
+        <p>Clears all wires connected to the specified component and updates the connectors to their default state.</p>
+        <pre><code>
+        function clearWiresFromComponent(componentId) {
+            const componentData = componentMap.get(componentId);
+            if (!componentData) return;
+        
+            console.log(connections);
+        
+            const { Button, connectors } = componentData;
+            console.log(connectors);
+        
+            // Update the background image of each connector
+            connectors.forEach(connector => {
+                const connectorElement = document.getElementById(connector.id);
+                if (connectorElement) {
+                    connectorElement.style.backgroundImage = `url('images/CONNECTOR.svg')`; // Replace with the desired default image
+                }
+            });
+        
+            // Create an array to store indices to delete
+            const indicesToDelete = [];
+        
+            // Iterate through the wires array
+            for (let i = 0; i < wires.length; i++) {
+                const wire = wires[i];
+                if (wire.startConnectionId.includes(componentId) || wire.endConnectionId.includes(componentId)) {
+                    indicesToDelete.push(i);
+        
+                    // Remove the associated SVG element
+                    const svgElementId = `wire-${wire.startConnectionId}-${wire.endConnectionId}`;
+                    const svgElement = document.getElementById(svgElementId);
+                    if (svgElement) {
+                        svgElement.remove();
+                    }
+                }
+            }
+        
+            // Remove the wires from the wires array
+            for (let i = indicesToDelete.length - 1; i >= 0; i--) {
+                wires.splice(indicesToDelete[i], 1);
+            }
+        
+            // Remove connections from the connections map
+            for (const [key, value] of connections.entries()) {
+                if (key.includes(componentId)) {
+                    // Remove forward entries
+                    value.forEach(endConnectionId => {
+                        if (connections.has(endConnectionId)) {
+                            connections.set(endConnectionId, connections.get(endConnectionId).filter(id => id !== key));
+                            if (connections.get(endConnectionId).length === 0) {
+                                connections.delete(endConnectionId);
+        
+                                // Change the button's image after deleting the key
+                                const endConnectionElement = document.getElementById(endConnectionId);
+                                if (endConnectionElement) {
+                                    endConnectionElement.style.backgroundImage = `url('images/CONNECTOR.svg')`; // Replace with the desired default image
+                                }
+                            }
+                        }
+                    });
+                    // Remove the entry itself
+                    connections.delete(key);
+        
+                    // Change the button's image after deleting the key
+                    const keyElement = document.getElementById(key);
+                    if (keyElement) {
+                        keyElement.style.backgroundImage = `url('images/CONNECTOR.svg')`; // Replace with the desired default image
+                    }
+                }
+            }
+        
+            console.log('Updated wires:', wires);
+            console.log('Updated connections:', connections);
+        }
+        </code></pre>
+        <p>Parameters:</p>
+        <ul>
+            <li><code>componentId</code>: The unique identifier for the component whose wires are to be cleared.</li>
+        </ul>
+
+        <h4 id="updateConnectors">updateConnectors(connectors)</h4>
+        <p>Updates the position and orientation of connector elements based on the current rotation of the component.</p>
+        <pre><code>
+        function updateConnectors(connectors) {
+            connectors.forEach(connector => {
+                // Remove previous positions
+                connector.style.top = '';
+                connector.style.bottom = '';
+                connector.style.left = '';
+                connector.style.right = '';
+                connector.style.transform = '';
+        
+                // Adjust positions based on the new rotation angle
+                if (connector.classList.contains('top-connector')) {
+                    attachRight(connector);
+                    connector.classList.remove('top-connector');
+                    connector.classList.add('right-connector');
+                } else if (connector.classList.contains('bot-connector')) {
+                    attachLeft(connector);
+                    connector.classList.remove('bot-connector');
+                    connector.classList.add('left-connector');
+                } else if (connector.classList.contains('left-connector')) {
+                    attachTop(connector);
+                    connector.classList.remove('left-connector');
+                    connector.classList.add('top-connector');
+                } else if (connector.classList.contains('right-connector')) {
+                    attachBot(connector);
+                    connector.classList.remove('right-connector');
+                    connector.classList.add('bot-connector');
+                }
+            });
+        }
+        </code></pre>
+        <p>Parameters:</p>
+        <ul>
+            <li><code>connectors</code>: An array of connector elements associated with the component.</li>
+        </ul>
+        
+        
+    <h4 id="attachClickListener">attachClickListener(button, connectionId)</h4>
+    <p>Attaches a click event listener to a button to handle the logic for starting and ending wire drawing based on the connection ID.</p>
+    <pre><code>
+    function attachClickListener(button, connectionId) {
+        if (typeof connectionId !== 'string') {
+            console.error('Invalid connectionId type in attachClickListener:', connectionId);
+            return;
+        }
+        button.addEventListener('click', function() {
+            console.log(`Connection point ${connectionId} clicked`);
+            if (!isDrawingWire) {
+                startDrawingWire(connectionId);
+            } else {
+                endDrawingWire(connectionId);
+            }
+        });
+    }
+    </code></pre>
+    <p>Parameters:</p>
+    <ul>
+        <li><code>button</code>: The button element to which the click event listener is attached.</li>
+        <li><code>connectionId</code>: A string representing the ID of the connection point.</li>
+    </ul>
+    <p>Functionality:</p>
+    <ul>
+        <li>Logs the click event for the specified connection ID.</li>
+        <li>If a wire is not currently being drawn, it starts drawing a wire from the connection point.</li>
+        <li>If a wire is currently being drawn, it ends the wire drawing at the connection point.</li>
+    </ul>
+    <p>Errors:</p>
+    <ul>
+        <li>Logs an error message if the <code>connectionId</code> parameter is not of type string.</li>
+    </ul>
+          
+
+    <h4 id="AddVoltage">AddVoltage()</h4>
+    <p>Adds a voltage component to the circuit grid.</p>
+    <p>Usage:</p>
+    <ul>
+        <li><code>AddVoltage()</code>: Adds a voltage component at a default position.</li>
+        <li><code>AddVoltage(posx, posy)</code>: Adds a voltage component at the specified position.</li>
+    </ul>
+
+    <h4 id="AddResistor">AddResistor()</h4>
+    <p>Adds a resistor component to the circuit grid.</p>
+    <p>Usage:</p>
+    <ul>
+        <li><code>AddResistor()</code>: Adds a resistor component at a default position.</li>
+        <li><code>AddResistor(posx, posy)</code>: Adds a resistor component at the specified position.</li>
+    </ul>
+
+    <h4 id="AddInductor">AddInductor()</h4>
+    <p>Adds an inductor component to the circuit grid.</p>
+    <p>Usage:</p>
+    <ul>
+        <li><code>AddInductor()</code>: Adds an inductor component at a default position.</li>
+        <li><code>AddInductor(posx, posy)</code>: Adds an inductor component at the specified position.</li>
+    </ul>
+
+    <h4 id="AddCapacitor">AddCapacitor()</h4>
+    <p>Adds a capacitor component to the circuit grid.</p>
+    <p>Usage:</p>
+    <ul>
+        <li><code>AddCapacitor()</code>: Adds a capacitor component at a default position.</li>
+        <li><code>AddCapacitor(posx, posy)</code>: Adds a capacitor component at the specified position.</li>
+    </ul>
+
+    <h4 id="AddGround">AddGround()</h4>
+    <p>Adds a ground component to the circuit grid.</p>
+    <p>Usage:</p>
+    <ul>
+        <li><code>AddGround()</code>: Adds a ground component at a default position.</li>
+        <li><code>AddGround(posx, posy)</code>: Adds a ground component at the specified position.</li>
+    </ul>
+    
+        <h4 id="updateCoordinates">updateCoordinates()</h4>
+        <p>Updates the coordinates of all components on the grid.</p>
+        <pre><code>
+            function updateCoordinates() {
+                const elements = document.querySelectorAll('.position');
+                elements.forEach(elem => {
+                    dragElement(elem.parentNode);
+                    const rect = elem.getBoundingClientRect();
+                    const componentInstance = getComponentFromButton(elem);
+                    if (componentInstance) {
+                        const componentId = elem.dataset.componentId;
+                        componentPositions[componentId] = {
+                            x: rect.left + window.scrollX,
+                            y: rect.top + window.scrollY
+                        };
+                    }
+                });
+            }
+        </code></pre>
+
+        <h4 id="getComponentFromButton">getComponentFromButton(button)</h4>
+<p>Retrieves the component instance associated with a given button element.</p>
+<pre><code>
+function getComponentFromButton(button) {
+    const componentId = button.dataset.componentId;
+    const componentInstance = componentMap.get(componentId).Button;
+    console.log(componentInstance);
+    return componentInstance;
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>button</code>: The button element associated with a component.</li>
+</ul>
+<p>Returns:</p>
+<ul>
+    <li><code>componentInstance</code>: The component instance associated with the button.</li>
+</ul>
+
+<h4 id="updateComponentCoordinates">updateComponentCoordinates(button, newX, newY)</h4>
+<p>Updates the coordinates of a component based on the new x and y positions.</p>
+<pre><code>
+function updateComponentCoordinates(button, newX, newY) {
+    const componentInstance = getComponentFromButton(button);
+    if (componentInstance) {
+        componentInstance.Button.updateCoordinates(newX, newY);
+    }
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>button</code>: The button element associated with the component.</li>
+    <li><code>newX</code>: The new x-coordinate for the component.</li>
+    <li><code>newY</code>: The new y-coordinate for the component.</li>
+</ul>
+
+<h4 id="handleClickOnComponent">handleClickOnComponent(componentId)</h4>
+<p>Handles the click event on a component to start or end wire drawing.</p>
+<pre><code>
+function handleClickOnComponent(componentId) {
+    if (isDrawingWire) {
+        endDrawingWire(componentId);
+    } else {
+        startDrawingWire(componentId);
+    }
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>componentId</code>: The ID of the component that was clicked.</li>
+</ul>
+
+<h4 id="documentDragEvent">document.addEventListener('drag', (event))</h4>
+<p>Event listener for the drag event to handle dragging of components.</p>
+<pre><code>
+document.addEventListener('drag', (event) => {
+    if (event.target && event.target.matches('button[data-component-id]')) {
+        onComponentDrag(event);
+    }
+});
+</code></pre>
+
+<h4 id="dragElement">dragElement(elmt)</h4>
+<p>Makes an element draggable and updates wire positions during the drag.</p>
+<pre><code>
+function dragElement(elmt) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    elmt.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+
+        elmt.style.top = (elmt.offsetTop - pos2) + "px";
+        elmt.style.left = (elmt.offsetLeft - pos1) + "px";
+
+        const button = elmt.querySelector('button[data-component-id]');
+        const componentId = button.dataset.componentId;
+
+        const rect = button.getBoundingClientRect();
+        updateComponentCoordinates(button, rect.left, rect.top);
+
+        updateWires(componentId);
+    }
+
+    function closeDragElement(e) {
+        document.onmouseup = null;
+        document.onmousemove = null;
+
+        const currentLeft = parseFloat(elmt.style.left);
+        const currentTop = parseFloat(elmt.style.top);
+        const snappedPosition = snapToGrid(currentLeft, currentTop);
+
+        elmt.style.left = snappedPosition.left + "px";
+        elmt.style.top = snappedPosition.top + "px";
+
+        const button = elmt.querySelector('button[data-component-id]');
+        
+        const rect = button.getBoundingClientRect();
+        updateComponentCoordinates(button, rect.left, rect.top);
+    }
+
+    function snapToGrid(left, top) {
+        let nearestLeft = findNearest(left, internalGrid.map(pair => pair[0]));
+        let nearestTop = findNearest(top, internalGrid.map(pair => pair[1]));
+
+        return { left: nearestLeft, top: nearestTop };
+    }
+
+    function findNearest(value, array) {
+        return array.reduce((prev, curr) => {
+            return (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev);
+        });
+    }
+}
+</code></pre>
+<p>Parameters:</p>
+<ul>
+    <li><code>elmt</code>: The element to be made draggable.</li>
+</ul>
+<p>Functions:</p>
+<ul>
+    <li><code>dragMouseDown(e)</code>: Initiates the drag operation.</li>
+    <li><code>elementDrag(e)</code>: Handles the element dragging and updates its position and coordinates.</li>
+    <li><code>closeDragElement(e)</code>: Ends the drag operation and snaps the element to the nearest grid position.</li>
+    <li><code>snapToGrid(left, top)</code>: Snaps the element to the nearest grid position based on its coordinates.</li>
+    <li><code>findNearest(value, array)</code>: Finds the nearest value in an array to a given value.</li>
+</ul>
+
+    
+        <h4 id="generateNetlist">generateNetlist()</h4>
+        <p>Generates a netlist based on the current circuit configuration.</p>
+        <pre><code>
+            function generateNetlist(circuitData) {
+                const wireMap = new Map();
+                let wireCounter = 1; // Start wire counter from 1 for more intuitive numbering
+            
+                // Helper function to get or assign a wire number
+                function getOrAssignWireNumber(connection) {
+                    if (!wireMap.has(connection)) {
+                        wireMap.set(connection, wireCounter++);
+                    }
+                    return wireMap.get(connection);
+                }
+            
+                // Assign wire numbers to all connections
+                circuitData.connections.forEach(([componentId, connectedComponents]) => {
+                    connectedComponents.forEach(connectedComponentId => {
+                        const wireKey = `${componentId}-${connectedComponentId}`;
+                        getOrAssignWireNumber(wireKey);
+                    });
+                });
+            
+                // Generate netlist based on assigned wire numbers
+                let netlist = '';
+                circuitData.components.forEach(([componentId, componentData]) => {
+                    const componentName = componentData.name.toLowerCase();
+                    const componentNum = parseInt(componentId.replace('component-', ''), 10);
+            
+                    // Find connectionA based on reverse lookup
+                    let connectionA = 0; // Default value if no connection found
+                    for (const [otherComponentId, connectedComponents] of circuitData.connections) {
+                        if (connectedComponents.includes(componentId)) {
+                            connectionA = parseInt(otherComponentId.replace('component-', ''), 10);
+                            break;
+                        }
+                    }
+            
+                    // Find connectionB based on direct connection
+                    let connectionB = 0; // Default value if no connection found
+                    const componentConnections = circuitData.connections.find(([id, _]) => id === componentId);
+                    if (componentConnections) {
+                        const [_, connectedComponents] = componentConnections;
+                        if (connectedComponents.length > 0) {
+                            // Ensure connectionB is different from connectionA
+                            const connectedComponentId = connectedComponents.find(id => id !== componentId.replace('component-', ''));
+                            if (connectedComponentId) {
+                                connectionB = parseInt(connectedComponentId.replace('component-', ''), 10);
+                            }
+                        }
+                    }
+            
+                    // Store the wire numbers in component data
+                    componentData.connectionA = connectionA;
+                    componentData.connectionB = connectionB;
+            
+                    netlist += `${componentName} ${connectionA} ${connectionB}\n`;
+                });
+            
+                console.log('netlist', netlist);
+                return netlist;
+            }
+        </code></pre>
+    
+        <h4 id="saveCircuit">saveCircuit()</h4>
+        <p>Saves the current circuit configuration.</p>
+        <pre><code>
+            async function saveCircuit() {
+                try {
+                    const circuitData = {
+                        components: Array.from(componentMap.entries()).map(([id, component]) => [id, { ...component }]),
+                        connections: Array.from(connections.entries())
+                    };
+            
+                    // Generate netlist and assign wire numbers to components
+                    generateNetlist(circuitData);
+            
+                    const dataToSave = JSON.stringify(circuitData, null, 2);
+                    console.log('Saving circuit data:', dataToSave);
+            
+                    const response = await window.electron.saveCircuit(circuitData);
+                    if (response && response.message) {
+                        alert(response.message);
+                    }
+                } catch (error) {
+                    console.error('Error saving circuit:', error);
+                    alert('An error occurred while saving the circuit.');
+                }
+            }
+        </code></pre>
+    
+        <h4 id="loadCircuit">loadCircuit(fileContent)</h4>
+        <p>Loads a circuit from the provided file content.</p>
+        <pre><code>
+            function loadCircuit(fileContent) {
+                try {
+                    const { components, connections } = JSON.parse(fileContent);
+            
+                    clearCircuit(); // Clear existing components
+            
+                    components.forEach(([componentId, componentData]) => {
+                        const { name } = componentData;
+                        const match = name.match(/^([a-zA-Z]+)(\d+)$/);
+                        if (!match) {
+                            console.warn(`Unsupported component name format: ${name}`);
+                            return;
+                        }
+            
+                        const componentType = match[1].toLowerCase();
+                        const componentNumber = parseInt(match[2], 10);
+            
+                        switch (componentType) {
+                            case 'volt':
+                                AddVoltage(`${componentData.x}px`, `${componentData.y}px`);
+                                break;
+                            case 'resistor':
+                                AddResistor(`${componentData.x}px`, `${componentData.y}px`);
+                                break;
+                            case 'inductor':
+                                AddInductor(`${componentData.x}px`, `${componentData.y}px`);
+                                break;
+                            case 'capacitor':
+                                AddCapacitor(`${componentData.x}px`, `${componentData.y}px`);
+                                break;
+                            case 'gnd':
+                                AddGround(`${componentData.x}px`, `${componentData.y}px`);
+                                break;
+                            default:
+                                console.warn(`Unsupported component type: ${componentType}`);
+                                return;
+                        }
+                    });
+            
+                    // Handle connections if needed
+                    connections.forEach(connection => {
+                        // Extract the IDs
+                        const id1 = connection[0]; // Extracting ID from "component-0", "component-1", etc.
+                        const connectedComponents = connection[1];
+                        console.log(id1);
+                        // Iterate through connected components and create wires
+                        connectedComponents.forEach(component => {
+                          const id2 = component; // Extracting ID from "component-1", "component-2", etc.
+                          createWire(id1, id2); // Call createWire function with extracted IDs
+                        });
+                      });
+            
+                    console.log('Circuit loaded successfully');
+                } catch (error) {
+                    console.error('Error loading circuit:', error);
+                }
+            }
+            
+        </code></pre>
+    
+        <h4 id="clearCircuit">clearCircuit()</h4>
+        <p>Clears the current circuit configuration.</p>
+        <pre><code>
+            function clearCircuit() {
+                // Remove all wires
+                wires.forEach(wire => {
+                    wire.path.remove();
+                });
+                wires.length = 0;
+            
+                // Clear component map, connections, and positions
+                componentMap.clear();
+                connections.clear();
+                componentPositions = {};
+            }
+        </code></pre>
+    
+        <h4 id="SimulateCircuit">SimulateCircuit()</h4>
+        <p>Redirects to the waveform simulation page.</p>
+        <pre><code>
+            
+        function SimulateCircuit() {
+            window.location.href = 'WaveForm.html';
+        }
+
+        </code></pre>
+
+        <h4 id="generateGrid">generateGrid()</h4>
+    <p>Generates a grid of points and stores them in the <code>internalGrid</code> array.</p>
+    <pre><code>
+    function generateGrid() {
+        // const grid = document.getElementById('grid');
+        for (let i = 220; i < 1500; i += 10) {
+            for (let j = 90; j < 1500; j += 10) {
+                // Store the point (i, j) in internalGrid
+                internalGrid.push([i, j]);
+            }
+        }
+    }
+    </code></pre>
+    <p>This function generates a grid of points, starting from (220, 90) to (1490, 1490) with a step of 10 pixels. Each point is stored as an array [i, j] in the <code>internalGrid</code> array.</p>
+
+        <div id="Wires">
+            <h2>Wires.js</h2>
+
+<p>This script is responsible for handling the drawing, updating, and managing of wires between connection points in a circuit design application.</p>
+
+<h4 id="constants">Constants</h4>
+<pre><code>
+// Define the size of the grid
+const GRID_SIZE = 10;
+</code></pre>
+
+<h4 id="variables">Variables</h4>
+<pre><code>
+let isDrawingWire = false;
+let startConnection = null;
+const connections = new Map();
+const wires = [];
+let componentInstances = [];
+let Grid = [];
+let currentDraggingWire = null;
+let initialPath = "";
+</code></pre>
+
+<h4 id="functions">Functions</h4>
+
+<h5 id="startDrawingWire">startDrawingWire(connectionId)</h5>
+<p>Starts drawing a wire from a connection point.</p>
+<pre><code>
+function startDrawingWire(connectionId) {
+    if (connectionId && connectionId.split('-').length === 3) {
+        //console.log(Started drawing wire from ${connectionId});
+        isDrawingWire = true;
+        startConnection = connectionId;
+    }
+}
+</code></pre>
+
+<h5 id="endDrawingWire">endDrawingWire(connectionId)</h5>
+<p>Ends drawing a wire at a connection point.</p>
+<pre><code>
+function endDrawingWire(connectionId) {
+    console.log(`Attempting to end wire drawing at ${connectionId}`);
+
+    // Check if we're currently drawing and the connectionId is different from startConnection
+    if (isDrawingWire && startConnection && connectionId !== startConnection) {
+        // Check if either startConnection or connectionId already has any connections
+        if (hasAnyConnection(startConnection) || hasAnyConnection(connectionId)) {
+            console.log(`Cannot draw wire. One or both of the connections (${startConnection}, ${connectionId}) already have existing connections.`);
+        } else {
+            // Create the wire and store the connection
+            createWire(startConnection, connectionId);
+            storeConnection(startConnection, connectionId);
+        }
+    }
+    
+    // Reset drawing state
+    resetDrawingState();
+}
+</code></pre>
+
+<h5 id="resetDrawingState">resetDrawingState()</h5>
+<p>Resets the wire drawing state.</p>
+<pre><code>
+function resetDrawingState() {
+    isDrawingWire = false;
+    startConnection = null;
+}
+</code></pre>
+
+<h5 id="hasAnyConnection">hasAnyConnection(connectionId)</h5>
+<p>Checks if a connection point has any existing connections.</p>
+<pre><code>
+function hasAnyConnection(connectionId) {
+    return connections.has(connectionId) && connections.get(connectionId).length > 0;
+}
+</code></pre>
+
+<h5 id="storeConnection">storeConnection(startConnectionId, endConnectionId)</h5>
+<p>Stores a connection between two connection points.</p>
+<pre><code>
+function storeConnection(startConnectionId, endConnectionId) {
+    if (!connections.has(startConnectionId)) {
+        connections.set(startConnectionId, []);
+    }
+    connections.get(startConnectionId).push(endConnectionId);
+
+    if (!connections.has(endConnectionId)) {
+        connections.set(endConnectionId, []);
+    }
+    connections.get(endConnectionId).push(startConnectionId);
+}
+</code></pre>
+
+<h5 id="createWire">createWire(startConnectionId, endConnectionId)</h5>
+<p>Creates a wire between two connection points.</p>
+<pre><code>
+function createWire(startConnectionId, endConnectionId) {
+    let startConnection = document.getElementById(startConnectionId);
+    let endConnection = document.getElementById(endConnectionId);
+
+    if(startConnection) {
+        startConnection.style.backgroundImage = `url('images/CONNECTOR-FULL.svg')`; // Set image for start connection
+    }
+    if(endConnection) {
+        endConnection.style.backgroundImage = `url('images/CONNECTOR-FULL.svg')`; // Set image for end connection
+    }
+
+    if (!startConnection) {
+        console.error('Start connection point not found:', startConnectionId);
+        return;
+    }
+    if (!endConnection) {
+        console.error('End connection point not found:', endConnectionId);
+        return;
+    }
+
+    const startConnectorType = getConnectorType(startConnectionId);
+    const endConnectorType = getConnectorType(endConnectionId);
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.classList.add('wire');
+    svg.style.position = 'absolute';
+    svg.style.zIndex = '1'; // Ensure SVG is behind the components
+    svg.style.pointerEvents = 'none'; // Disable pointer events on SVG
+    svg.style.left = '0';
+    svg.style.top = '0';
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    svg.setAttribute('id', `wire-${startConnectionId}-${endConnectionId}`); // Add unique ID
+
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('stroke', 'black');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('fill', 'none');
+
+    svg.appendChild(path);
+    document.body.appendChild(svg);
+
+    let instances = getClassInstances();
+
+    wires.push({ startConnectionId, endConnectionId, path });
+
+    updateWirePosition(startConnection, endConnection, path, startConnectorType, endConnectorType, instances);
+}
+</code></pre>
+
+<h5 id="updateWirePosition">updateWirePosition(startConnection, endConnection, path, startType, endType, instances)</h5>
+<p>Updates the position of a wire between two connection points.</p>
+<pre><code>
+function updateWirePosition(startConnection, endConnection, path, startType, endType, instances) {
+    const startRect = startConnection.getBoundingClientRect();
+    const endRect = endConnection.getBoundingClientRect();
+
+    const d = wirePathing(startRect, endRect, startType, endType, instances);
+    path.setAttribute('d', d);
+
+    //console.log('Updated wire path:', d);
+}
+</code></pre>
+
+<h5 id="wirePathing">wirePathing(startRect, endRect, startType, endType, instances)</h5>
+<p>Generates the path data for a wire between two connection points.</p>
+<pre><code>
+function wirePathing(startRect, endRect, startType, endType, instances) {
+    //console.log(instances);
+
+    let tpArray = [];
+    //const midx = (startx + endx) / 2;
+    //const midy = (starty + endy) / 2;
+
+
+    let pathData = [];
+    //start coords
+    let StartNorthX = startRect.left + startRect.width / 2;
+    let StartNorthY = startRect.top;
+
+    let StartSouthX = startRect.left + startRect.width / 2;
+    let StartSouthY = startRect.bottom;
+
+    let StartRightX = startRect.right;
+    let StartRightY = startRect.top + startRect.height / 2;
+
+    let StartLeftX = startRect.left;
+    let StartLeftY = startRect.top + startRect.height / 2;
+
+    //end coords
+    let EndNorthX = endRect.left + endRect.width / 2;
+    let EndNorthY = endRect.top;
+
+    let EndSouthX = endRect.left + endRect.width / 2;
+    let EndSouthY = endRect.bottom;
+
+    let EndRightX = endRect.right;
+    let EndRightY = endRect.top + endRect.height / 2;
+
+    let EndLeftX = endRect.left;
+    let EndLeftY = endRect.top + endRect.height / 2;
+
+    let startx = 0;
+    let starty = 0;
+
+    let Endx = 0;
+    let Endy = 0;
+
+
+    // Draw according to startType
+    if (startType === 1) {
+        startx = StartNorthX;
+        starty = StartNorthY;
+    }
+    if (startType === 2) {
+        startx = StartSouthX;
+        starty = StartSouthY;
+    }
+    if (startType === 3) {
+        startx = StartLeftX;
+        starty = StartLeftY;
+    }
+    if (startType === 4) {
+        startx = StartRightX;
+        starty = StartRightY;
+    }
+
+
+    // Draw according to endType
+    if (endType === 1) {
+        Endx = EndNorthX;
+        Endy = EndNorthY;
+
+    }
+    if (endType === 2) {
+        // Go down 10 pixels
+        Endx = EndSouthX;
+        Endy = EndSouthY;
+    }
+    if (endType === 3) {
+        // Go left 10 pixels
+        Endx = EndLeftX;
+        Endy = EndLeftY;
+    }
+    if (endType === 4) {
+        // Go right 10 pixels
+        Endx = EndRightX;
+        Endy = EndRightY;
+    }
+
+    wireTraversal(startx, starty, Endx, Endy, pathData, instances);
+    return pathData;
+}
+</code></pre>
+
+<h5 id="extractComponentId">extractComponentId(id)</h5>
+<p>Extracts the component identifier part from a given id.</p>
+<pre><code>
+function extractComponentId(id) {
+    const parts = id.split('-');
+    return parts.length > 1 ? parts.slice(-1).join('-') : id;
+}
+</code></pre>
+
+<h5 id="getConnectorType">getConnectorType(connectionId)</h5>
+<p>Determines the type of a connection point (North, South, East, West).</p>
+<pre><code>
+function getConnectorType(connectionId) {
+    if (connectionId.endsWith('-n')) return 1;
+    if (connectionId.endsWith('-s')) return 2;
+    if (connectionId.endsWith('-e')) return 3;
+    if (connectionId.endsWith('-w')) return 4;
+    return 0;
+}
+</code></pre>
+
+<h5 id="updateWiresOnComponentDrag">updateWiresOnComponentDrag(componentId)</h5>
+<p>Updates the wires connected to a component when it is dragged.</p>
+<pre><code>
+function updateWiresOnComponentDrag(componentId) {
+    console.log(`Updating wires for component: ${componentId}`);
+    const componentConnections = getConnectionsForComponent(componentId);
+    const instances = getClassInstances();
+
+    componentConnections.forEach(([startConnectionId, endConnectionId]) => {
+        const startConnection = document.getElementById(startConnectionId);
+        const endConnection = document.getElementById(endConnectionId);
+        const wire = wires.find(w => (w.startConnectionId === startConnectionId && w.endConnectionId === endConnectionId) || (w.startConnectionId === endConnectionId && w.endConnectionId === startConnectionId));
+
+        if (startConnection && endConnection && wire) {
+            const startConnectorType = getConnectorType(startConnectionId);
+            const endConnectorType = getConnectorType(endConnectionId);
+            updateWirePosition(startConnection, endConnection, wire.path, startConnectorType, endConnectorType, instances);
+        }
+    });
+}
+</code></pre>
+
+<h5 id="getConnectionsForComponent">getConnectionsForComponent(componentId)</h5>
+<p>Retrieves the connections for a given component.</p>
+<pre><code>
+function getConnectionsForComponent(componentId) {
+    const componentConnections = [];
+    connections.forEach((connectedIds, connectionId) => {
+        if (connectionId.startsWith(componentId)) {
+            connectedIds.forEach(connectedId => {
+                componentConnections.push([connectionId, connectedId]);
+            });
+        }
+    });
+    return componentConnections;
+}
+</code></pre>
+
+<h5 id="getClassInstances">getClassInstances()</h5>
+<p>Retrieves the instances of classes in the grid.</p>
+<pre><code>
+function getClassInstances() {
+    return componentInstances;
+}
+</code></pre>
+
+<h5 id="wireTraversal">wireTraversal(startX, startY, endX, endY, pathData, instances)</h5>
+<p>Generates the path data for wire traversal.</p>
+<pre><code>
+function wireTraversal(startX, startY, endX, endY, pathData, instances) {
+    // Current position
+    let currentX = startX;
+    let currentY = startY;
+    let dx = endX - startX;
+    let dy = endY - startY;
+    let sx = Math.sign(dx);
+    let sy = Math.sign(dy);
+    let origDx = Math.abs(dx);
+    let origDy = Math.abs(dy);
+
+    // Move horizontally first
+    if (sx !== 0) {
+        while (currentX !== endX) {
+            currentX += sx * GRID_SIZE;
+            let tpX = Math.round(currentX / GRID_SIZE);
+            let tpY = Math.round(currentY / GRID_SIZE);
+            // Store the path
+            pathData.push(`M ${currentX} ${currentY}`);
+            pathData.push(`L ${currentX} ${currentY}`);
+        }
+    }
+
+    // Then move vertically
+    if (sy !== 0) {
+        while (currentY !== endY) {
+            currentY += sy * GRID_SIZE;
+            let tpX = Math.round(currentX / GRID_SIZE);
+            let tpY = Math.round(currentY / GRID_SIZE);
+            // Store the path
+            pathData.push(`M ${currentX} ${currentY}`);
+            pathData.push(`L ${currentX} ${currentY}`);
+        }
+    }
+}
+</code></pre>
+
+        </div>
+    </div>
+    
+</body>
+</html>

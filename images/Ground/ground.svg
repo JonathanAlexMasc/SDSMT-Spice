@@ -1,0 +1,14 @@
+<svg width="120" height="120" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-circuit-ground" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+ <g id="Layer_1">
+  <title>Layer 1</title>
+  <path stroke="null" stroke-width="10" d="m127.5,41.82448l1,0l0,57l-1,0l0,-57z" id="svg_3"/>
+  <path stroke-width="10" d="m73.50001,134.75556l108.99999,0l0,5l-108.99999,0l0,-5z" id="svg_5" stroke="null"/>
+  <path stroke-width="10" d="m98,164.59552l60.00001,0l0,2.99999l-60.00001,0l0,-2.99999z" id="svg_6" stroke="null"/>
+  <ellipse fill="#fff" stroke="#000" cx="493" cy="51" id="svg_2" rx="1" ry="1.5"/>
+  <path stroke="null" stroke-width="5" d="m60.5,2.5l-1,0l0,38l1,0l0,-38z" id="svg_7"/>
+  <path stroke="null" stroke-width="5" d="m16,44.95553l88,0l0,1l-88,0l0,-1z" id="svg_8"/>
+  <path stroke="null" stroke-width="5" d="m39,85.95553l42,0l0,1l-42,0l0,-1z" id="svg_11"/>
+  <path stroke="null" stroke-width="5" d="m30,64.95553l60,0l0,1l-60,0l0,-1z" id="svg_12"/>
+ </g>
+
+</svg>

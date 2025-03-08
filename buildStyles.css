@@ -1,0 +1,219 @@
+/* Root variables for controlling grid size, thickness, and dimensions */
+:root {
+    --tile-size: 10px;           /* Size of each grid tile */
+    --grid-thickness: 1px;       /* Thickness of grid lines */
+    --max-tiles: 70;             /* Maximum number of tiles in a row */
+    --max-rows: 70;              /* Maximum number of rows */
+    --max-columns: 70;           /* Maximum number of columns */
+}
+
+/* General body and layout styling */
+body {
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.topologic-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.horizontalControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #444;
+    color: #fff;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.horizontalControls .left-controls,
+.horizontalControls .right-controls {
+    display: flex;
+    align-items: center;
+}
+
+.horizontalControls button {
+    background-color: green;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-right: 10px;
+}
+
+.horizontalControls button:hover {
+    background-color: darkgreen;
+}
+
+.horizontalControls button:active {
+    background-color: forestgreen;
+}
+
+.horizontalControls #fileHolder {
+    margin-right: 10px;
+}
+
+.spice-container {
+    overflow: auto;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    width: 100%;
+    height: 100%;
+}
+
+.menu {
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    height: 100%;
+    position: relative;
+    overflow-y: auto;
+}
+
+.menu a {
+    color: #fff;
+    text-decoration: none;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #444;
+    border-radius: 5px;
+    display: block;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+.menu a:hover {
+    background-color: #555;
+}
+
+.menu-item {
+    position: relative; /* Ensures submenu is positioned relative to this element */
+}
+
+.submenu {
+    display: none;
+    position: absolute;
+    left: 100%; /* Position to the right of the menu item */
+    top: 0; /* Align with the top of the menu item */
+    background-color: #444;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    white-space: nowrap; /* Prevents submenu items from wrapping */
+}
+
+.menu-item:hover .submenu {
+    display: block;
+}
+
+.submenu a {
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 3px;
+    display: block;
+}
+
+.submenu a:hover {
+    background-color: #666;
+}
+
+.grid-container {
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+}
+
+.grid-lines {
+    display: grid;
+    grid-template-columns: repeat(var(--max-tiles), var(--tile-size));
+    grid-template-rows: repeat(var(--max-rows), var(--tile-size));
+    gap: var(--grid-thickness);
+    background: conic-gradient(
+        from 90deg at var(--grid-thickness) var(--grid-thickness),
+        #0000 25%, 
+        #556270 0
+    ) 0 0 / var(--tile-size) var(--tile-size);
+    border: var(--grid-thickness) solid #556270;
+}
+
+.b1 {
+    position: absolute;
+    grid-column-start: 3;
+    grid-row-start: 3;
+    grid-column-end: 6;
+    cursor: move;
+}
+
+/* Fallback for browsers that do not support 'opacity: round' */
+@supports not (opacity: round(1, 1)) {
+    .grid-lines {
+        width: calc(100% - var(--grid-thickness) * 2);
+    }
+}
+
+.floating__container {
+    position: absolute;
+    z-index: 1000;
+    width: 100px; /* Match button size */
+    height: 100px; /* Match button size */
+    top: 50%;
+    left: 50%;
+    transform: translate(-10%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease; /* Smooth transition */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.floating__toggle {
+    width: 40px;
+    height: 40px;
+    background-color: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.floating__options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+}
+
+.floating__link {
+    margin: 10px 0;
+}
+
+.floating__icon img {
+    width: 24px;
+    height: 24px;
+}
+
+#zoom-controls {
+    z-index: 10;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

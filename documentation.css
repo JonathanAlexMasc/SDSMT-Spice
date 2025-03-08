@@ -1,0 +1,165 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+a {
+    color: #555;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1,
+h2,
+h3 {
+    color: #333;
+    margin: 20px 0 10px;
+}
+
+p {
+    margin: 10px 0;
+}
+
+/* Horizontal Controls */
+.horizontalControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 10px 20px;
+}
+
+.horizontalControls button {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #bbb;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.horizontalControls button:hover {
+    background-color: #d6d6d6;
+    border-color: #999;
+}
+
+/* Documentation Header */
+.doc-header {
+    text-align: center;
+    background-color: #eaeaea;
+    padding: 20px;
+    border-bottom: 2px solid #ccc;
+}
+
+.doc-header h1 {
+    font-size: 2em;
+    margin: 0;
+    color: #333;
+}
+
+.doc-header p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #666;
+}
+
+/* Back to Top Link */
+.back-to-top-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.back-to-top-container a {
+    font-size: 1em;
+    color: #555;
+}
+
+.back-to-top-container a:hover {
+    color: #333;
+}
+
+/* Main Options and Functions */
+.main-options,
+.build-functions,
+.run-functions {
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.main-options a,
+.build-functions a,
+.run-functions a {
+    margin-right: 15px;
+    display: inline-block;
+    color: #555;
+    font-weight: bold;
+}
+
+.main-options a:hover,
+.build-functions a:hover,
+.run-functions a:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+/* Introduction Section */
+#introduction-section,
+#run-section,
+#build-section {
+    margin: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+#introduction-section pre,
+#run-section pre,
+#build-section pre {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    overflow: auto;
+    font-family: Consolas, 'Courier New', monospace;
+}
+
+/* Code Blocks */
+pre code {
+    display: block;
+    background: #f7f7f7;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-size: 14px;
+}
+
+/* Chart Styling */
+#chartCanvas {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .horizontalControls {
+        flex-direction: column;
+    }
+
+    .horizontalControls button {
+        margin: 5px 0;
+    }
+}

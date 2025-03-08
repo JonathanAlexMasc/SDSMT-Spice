@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spice Build</title>
+    <link rel="stylesheet" href="buildStyles.css">
+    <script type="module" src="buildModule.js"></script>
+    <script src="./components/entities.js"></script>
+    <script src="./components/loads/load.js"></script>
+    <script src="./components/diodes/baseDiode.js"></script>
+    <script src="./components/transistors/baseTransistor.js"></script>
+    <script src="Controller.js"></script>
+    <script src="Wires.js"></script>
+    <script src="Classes.js"></script>
+    <!-- REMIXICONS for FAB icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/1336c6bb31.js" crossorigin="anonymous"></script>
+    <script src="floating.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <div class="topologic-container">
+        <div class="horizontalControls">
+            <div class="left-controls">
+                <button id="saveButton">Save Circuit</button>
+                <button id="loadButton">Load Circuit</button>
+                <button id="clearButton" onclick="clearCircuit()">Clear Circuit</button>
+                <button id="build-home" onclick="window.location.href='index.html'">Home</button>
+            </div>
+            <p id="fileHolder">No File Selected</p>
+            <div class="right-controls">
+                <button id="circSim" onclick="SimulateCircuit()">Simulate Circuit</button>
+            </div>
+        </div>
+        <div class="spice-container"> 
+            <div class="menu">
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#sch_conn" role="button" aria-expanded="false"
+                    aria-controls="collapseExample">
+                    Ground
+                </a>
+                <div class="collapse" id="sch_conn">
+                    <div id="gnd_btn" class="card card-body text-dark">
+                        Ground
+                    </div>
+                </div>
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#sources" role="button" aria-expanded="false"
+                    aria-controls="collapseExample">
+                    Sources
+                </a>
+                <div class="collapse" id="sources">
+                    <div id="volt_btn" class="card card-body text-dark">
+                        AC Source
+                    </div>
+                    <div id="dcVolt_btn" class="card card-body text-dark">
+                        DC Source
+                    </div>
+                </div>
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#passive" role="button" aria-expanded="false"
+                    aria-controls="collapseExample">
+                    Loads
+                </a>
+                <div class="collapse" id="passive">
+                    <div id="resistor_btn" class="card card-body text-dark my-2">
+                        Resistor
+                    </div>
+                    <div id="inductor_btn" class="card card-body text-dark my-2">
+                        Inductor
+                    </div>
+                    <div id="capacitor_btn" class="card card-body text-dark my-2">
+                        Capacitor
+                    </div>
+                </div>
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#diodes" role="button" aria-expanded="false"
+                    aria-controls="collapseExample">
+                    Diodes
+                </a>
+                <div class="collapse" id="diodes">
+                    <div id="gen_diode" class="card card-body text-dark my-2">
+                        Diode
+                    </div>
+                    <div id="zen_diode" class="card card-body text-dark my-2">
+                        Zener Diode
+                    </div>
+                    <div id="led_diode" class="card card-body text-dark my-2">
+                        LED
+                    </div>
+                </div>
+
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#transistors" role="button" aria-expanded="false"
+                    aria-controls="collapseExample">
+                    Transistors
+                </a>
+                <div class="collapse" id="transistors">
+                    <div id="npn" class="card card-body text-dark my-2">
+                        NPN
+                    </div>
+                    <div id="pnp" class="card card-body text-dark my-2">
+                        PNP
+                    </div>
+                    <div id="nmos" class="card card-body text-dark my-2">
+                        NMOS
+                    </div>
+                    <div id="pmos" class="card card-body text-dark my-2">
+                        PMOS
+                    </div>
+                    <div id="njfet" class="card card-body text-dark my-2">
+                        NJFET
+                    </div>
+                    <div id="pjfet" class="card card-body text-dark my-2">
+                        PJFET
+                    </div>
+                </div>
+
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#probes" role="button" aria-expanded="false"
+                    aria-controls="collapseExample">
+                    Probes
+                </a>
+                <div class="collapse" id="probes">
+                    <div class="card card-body text-dark my-2" onclick="AddVoltageProbe()">
+                        Voltage Probe
+                    </div>
+                </div>
+
+                <div class="collapse" id="probes">
+                    <div class="card card-body text-dark my-2" onclick="AddCurrentProbe()">
+                        Current Probe
+                    </div>
+                </div>
+                <div class="collapse" id="probes">
+                    <div class="card card-body text-dark my-2" onclick="generateNetlist()">
+                        generate Netlist
+                    </div>
+                </div>
+            </div>
+            <div id="cont" class="grid-container">
+                <div id="zoom-controls">
+                    <button id="zoom-in-btn"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                    <button id="zoom-out-btn"><i class="fas fa-search-minus"></i></button>
+                    <button id="reset-zoom-btn"><i class="fas fa-recycle"></i></button>
+                </div>
+                <div class="grid-lines" id="grid">
+                    <svg id="grid-svg" width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 0;">
+                        <!-- Wire paths will go here -->
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="Build.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous">
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (sessionStorage.getItem("loadCircuit") === "true") {
+                sessionStorage.removeItem("loadCircuit"); // Clear flag
+                console.log("Triggering loadtempFile...");
+                await loadtempFile(); // Make sure this function exists
+            }
+        });
+    </script>
+</body>
+</html>

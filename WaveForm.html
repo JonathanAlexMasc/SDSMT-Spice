@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spice Run</title>
+    <link rel="stylesheet" href="generatorStyles.css">
+</head>
+<body>
+    <div class="top-controls">
+        <div class="left-buttons">
+            <button id="loadButton">Load</button>
+            <button id="run-home" onclick="window.location.href='index.html'">Home</button>
+        </div>
+        <p id="fileHolder">No File Selected</p>
+        <p>SDM_SPICE</p>
+        <div class="right-buttons">
+            <label class="switch">
+                <input type="checkbox" id="toggleWaveform">
+                <span class="toolSlider"></span>
+            </label>
+
+            <button id="viewData">Raw Data</button>
+            <button id="simulateButton">Simulate Circuit</button>
+            <button id="EditCircuit" onclick="EditCircuit()">Edit Circuit</button>
+        </div>
+    </div>
+    <div class="container">
+        <div id="output">
+            <div class="graph-container">
+                <canvas id="chartCanvas"></canvas>
+            </div>
+        </div>        
+        <div class="controls-container">
+            <div class="control-group">
+                <div class="wave-selector">
+                    <label for="waveSelect">Select Waveform:</label>
+                    <select id="waveSelect">
+                        <option value="SINE">Sine</option>
+                        <option value="SQUARE">Square</option>
+                        <option value="SAWTOOTH">Sawtooth</option>
+                        <option value="TRIANGLE">Triangle</option>
+                    </select>
+                    <label for="OutType" id="OutTypeID">Analysis Options:</label>
+                    <select id="OutType">
+                        <option value="ACSweep">AC Sweep</option>
+                        <option value="DCSweep">DC Sweep</option>
+                        <option value="Transient">Transient</option>
+                        <option value="DC OP">DC OP</option>
+                    </select>
+                    <div id="Custom_Container">
+                    </div>
+                </div>
+                <div class="plot-selector">
+                    <label for="plotSelect">Select Plot:</label>
+                    <select id="plotSelect">
+                        <option value="plot1">Signal In</option>
+                    </select>
+                </div>
+                <div class="axis-selector">
+                    <fieldset>
+                        <legend>Axis Selector</legend>
+                        <label>
+                            <input type="radio" name="axisSelector" value="x" checked> X Axes
+                        </label>
+                        <label>
+                            <input type="radio" name="axisSelector" value="y"> Y Axes
+                        </label>
+                    </fieldset>
+                </div>
+                <div class="scale-selector">
+                    <fieldset>
+                        <legend>Scale Selector</legend>
+                        <label>
+                            <input type="radio" name="scaleSelector" value="linear" checked> Linear
+                        </label>
+                        <label>
+                            <input type="radio" name="scaleSelector" value="logarithmic"> Logarithmic
+                        </label>
+                    </fieldset>
+                </div>
+                <div class="slider-selector">
+                    <div class="slider-container">
+                        <label for="slider1">Amplitude:</label>
+                        <input type="range" min="0" max="100" value="1" class="slider" id="slider1">
+                        <input type="text" class="input-box" id="input1" value="1">
+                    </div>
+                    <div class="slider-container">
+                        <label for="slider2">Frequency:</label>
+                        <input type="range" min="0" max="100" value="1" class="slider" id="slider2">
+                        <input type="text" class="input-box" id="input2" value="1">
+                    </div>
+                    <div class="slider-container">
+                        <label for="slider3">DC Offset:</label>
+                        <input type="range" min="-100" max="100" value="0" class="slider" id="slider3">
+                        <input type="text" class="input-box" id="input3" value="0">
+                    </div>
+                    <!-- Add more sliders as needed -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Raw Data</h2>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Index</th>
+                        <th>Frequency</th>
+                        <th>db(i(voltage1))</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be dynamically populated -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="Generator.js"></script>
+</body>
+</html>

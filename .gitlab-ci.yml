@@ -1,0 +1,95 @@
+image: node:latest  
+
+.windows_job:
+  tags:
+    - saas-windows-medium-amd64
+
+.macos_job:
+  tags:
+    - saas-macos-medium-m1
+  image: macos-14-xcode-15 
+
+stages:
+  - generate_mac_exec
+  - macos_release
+  - generate_win_exec
+  - windows_release
+
+cache:
+  paths:
+    - node_modules/
+
+generate_win_exec:
+  extends:
+    - .windows_job
+  stage: generate_win_exec
+  script:
+    - echo $CI_JOB_ID
+    - echo "GE_JOB_ID=$CI_JOB_ID" >> generate_executables.env
+    - npm install
+    - echo "Generating Build Artifacts"
+    - npm run make
+  artifacts:
+    paths:
+      - out/make/zip/win32/x64
+    reports:
+      dotenv: generate_executables.env
+
+generate_mac_exec:
+  extends:
+    - .macos_job
+  stage: generate_mac_exec
+  script:
+    - echo $CI_JOB_ID
+    - echo MacOS Job Token - $CI_JOB_TOKEN
+    - echo "GM_JOB_ID=$CI_JOB_ID" >> generate_executables.env
+    - npm install
+    - echo "Generating macOS .dmg Artifact"
+    - npm run make
+  artifacts:
+    paths:
+      - out/make/zip/darwin/arm64/
+    reports:
+      dotenv: generate_executables.env
+
+macos_release:
+  stage: macos_release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+
+  script:
+    - echo 'macOS Job ID is printed below'
+    - echo $GM_JOB_ID
+  needs:
+    - job: generate_mac_exec
+      artifacts: true
+  release:
+    name: 'MacOS Release $CI_COMMIT_TAG'
+    description: 'Created using the release-cli'
+    tag_name: '$CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'macOS DMG'
+          url: 'https://gitlab.com/api/v4/jobs/${GM_JOB_ID}/artifacts'
+
+windows_release:
+  stage: windows_release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo 'Running Windows Release'
+    - echo 'Windows Job ID is printed below'
+    - echo $GE_JOB_ID
+  needs:
+    - job: generate_win_exec
+      artifacts: true
+  release:
+    name: 'Windows Release'
+    description: 'Created using the release-cli'
+    tag_name: '$CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'Windows Executable'
+          url: 'https://gitlab.com/api/v4/jobs/${GE_JOB_ID}/artifacts'

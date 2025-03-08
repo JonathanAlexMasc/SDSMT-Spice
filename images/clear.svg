@@ -1,0 +1,10 @@
+<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-tabler icon-tabler-circuit-capacitor">
+ <g id="Layer_1">
+  <title>Layer 1</title>
+  <path fill="#fff" stroke="#000" opacity="NaN" d="m-192.00001,48.20001c197.02763,-29.70001 -92,-96 -37,-118c55,-22 133,62 133,66" id="svg_2"/>
+  <text fill="#000000" stroke="#000" x="-29.99942" y="6.15005" id="svg_3" stroke-width="0" font-size="24" font-family="Noto Sans JP" text-anchor="start" xml:space="preserve"/>
+  <path id="svg_6" d="m-12.27902,17.652l0.0118,-0.02035l0,0.01017l0.0171,0l0,-0.01017l0.0118,0.02035l-0.0118,0.02034l0,-0.01017l-0.0171,0l0,0.01017l-0.0118,-0.02034z" stroke-width="0.5" stroke="#000" fill="none"/>
+  <path id="svg_7" d="m6.45418,6.94333c-1.52011,0 -2.80884,0.86793 -3.27272,2.073l-1.05512,0l0,1.96635l1.05512,0c0.46332,1.20507 1.75205,2.07349 3.27272,2.07349c1.91057,0 3.45905,-1.36824 3.45905,-3.05642s-1.54903,-3.05642 -3.45905,-3.05642zm10.2709,2.07349c-0.52506,-2.54186 -3.03744,-4.46938 -6.06432,-4.46938l0,1.96586c2.17866,0.00295 3.94072,1.56089 3.94573,3.48645c-0.00501,1.92507 -1.76707,3.48203 -3.94573,3.48596l0,1.96684c3.02687,-0.00197 5.53926,-1.92949 6.06432,-4.47036l1.14857,0l0,-1.96537l-1.14857,0z" stroke-width="0.5" stroke="#000" fill="none"/>
+ </g>
+
+</svg>

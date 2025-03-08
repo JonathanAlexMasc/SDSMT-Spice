@@ -1,0 +1,14 @@
+<svg width="120" height="108" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-tabler icon-tabler-circuit-ground">
+ <g id="Layer_1">
+  <title>Layer 1</title>
+  <path id="svg_14" d="m355.70245,59.71448l2.00002,0l0,0.47606l-2.00002,0l0,-0.47606z" stroke-width="10" stroke="null"/>
+  <ellipse stroke="null" ry="37.23523" rx="38.50001" id="svg_1" cy="53.50179" cx="61.99999" stroke-width="5"/>
+  <path stroke="null" id="svg_3" d="m54.44809,32.75803l15.10336,0l0,0.51358l-15.10336,0l0,-0.51358z" stroke-width="5"/>
+  <path stroke="null" id="svg_4" d="m53.19281,71.78787l17.61438,0l0,0.51358l-17.61438,0l0,-0.51358z" stroke-width="5"/>
+  <path stroke="null" id="svg_5" d="m61.69004,25.57402l0.10325,14.38018l-0.50371,0.00377l-0.10325,-14.38018l0.50371,-0.00377z" stroke-width="5"/>
+  <path stroke="null" id="svg_10" d="m44.13399,56.04284c6.92764,-6.08242 9.47992,-6.51688 13.12605,-4.12736c3.64612,2.38952 -0.36461,-0.65168 6.92764,4.99627c7.29226,5.64797 15.67834,-5.8652 15.67834,-5.97381" opacity="NaN" stroke-width="5"/>
+  <path stroke="null" id="svg_13" d="m61.6257,-2.85807l0.74859,0l0,17.24461l-0.74859,0l0,-17.24461z" stroke-width="5"/>
+  <path stroke="null" id="svg_15" d="m61.49673,92.73003l1.00654,0l0,19.21745l-1.00654,0l0,-19.21745z" stroke-width="5"/>
+ </g>
+
+</svg>

@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: cimg/node:23.3.0
+    steps:
+    - checkout
+    - run:
+        command: npm i -D @playwright/test
+    - run:
+        command: npx playwright install
+    - run:
+        name: Run Playwright specs
+        command: npm run test
+workflows:
+  version: 2
+  workflow:
+    jobs:
+    - build

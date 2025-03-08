@@ -1,0 +1,30 @@
+
+/* Documentation page styles */
+.doc-header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.doc-header h1 {
+    font-size: 36px;
+}
+
+.doc-header p {
+    font-size: 18px;
+    margin: 5px 0;
+}
+
+#introduction-section {
+    text-align: center;
+}
+
+.back-to-top-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Ensure it's above other content */
+}

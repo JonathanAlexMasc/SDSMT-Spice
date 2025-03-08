@@ -1,0 +1,14 @@
+<svg width="120.00000000000003" height="120.00000000000003" xmlns="http://www.w3.org/2000/svg" style="vector-effect: non-scaling-stroke;" stroke="null">
+ <g stroke="null">
+  <title stroke="null">Layer 1</title>
+  <line stroke="#000" stroke-width="5" fill="none" x1="20" y1="20" x2="100" y2="60" id="svg_3" stroke-linejoin="undefined" stroke-linecap="undefined"/>
+  <line stroke="#000" stroke-width="5" fill="none" x1="20" y1="100" x2="100" y2="60" id="svg_4" stroke-linejoin="undefined" stroke-linecap="undefined"/>
+  <line stroke="#000" stroke-width="5" fill="none" x1="20" y1="18" x2="20" y2="102" id="svg_5" stroke-linejoin="undefined" stroke-linecap="undefined"/>
+  <line stroke="#000" stroke-width="5" fill="none" x1="100.19268" y1="90" x2="100.19268" y2="30" id="svg_6" stroke-linejoin="undefined" stroke-linecap="undefined"/>
+  <line stroke="#000" stroke-width="5" fill="none" x1="20" y1="60.05232" x2="0.33745" y2="60.39868" id="svg_7" stroke-linejoin="undefined" stroke-linecap="undefined"/>
+  <line stroke="#000" stroke-width="5" fill="none" x1="119.66255" y1="60" x2="101.19118" y2="60" id="svg_8" stroke-linejoin="undefined" stroke-linecap="undefined"/>
+  <path transform="rotate(153.43 82.4823 83.6251)" stroke="#000" id="svg_16" d="m81.03848,83.61877l1.44379,-2.62511l1.4438,2.62511l-0.7219,0l0,2.63774l-1.44379,0l0,-2.63774l-0.7219,0z" stroke-width="5" fill="none"/>
+  <path transform="rotate(153.43 71.2608 89.4147)" stroke="#000" id="svg_17" d="m69.81696,89.40838l1.44379,-2.62511l1.4438,2.62511l-0.7219,0l0,2.63774l-1.44379,0l0,-2.63774l-0.7219,0z" stroke-width="5" fill="none"/>
+ </g>
+
+</svg>
