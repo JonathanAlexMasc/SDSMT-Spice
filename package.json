@@ -1,6 +1,6 @@
 {
   "name": "sdm-spice",
-  "version": "1.0.4",
+  "version": "1.0.3",
   "description": "Spice",
   "main": "Loader.js",
   "scripts": {
