@@ -43,7 +43,7 @@ module.exports = {
             config: {
                 repository: {
                     owner: 'JonathanAlexMasc',
-                    name: 'habanero-spice'
+                    name: 'SDSMT-Spice'
                 },
                 prerelease: true
             }
