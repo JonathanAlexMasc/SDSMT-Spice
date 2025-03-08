@@ -45,7 +45,7 @@ module.exports = {
                     owner: 'JonathanAlexMasc',
                     name: 'SDSMT-Spice'
                 },
-                prerelease: true
+                prerelease: false
             }
         }
     ]
