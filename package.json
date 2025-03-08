@@ -5,41 +5,39 @@
   "main": "Loader.js",
   "scripts": {
     "test": "playwright test",
-    "start": "electron .",
+    "start": "electron-forge start",
     "make": "electron-forge make",
-    "package": "electron-forge package"
+    "package": "electron-forge package",
+    "wdio": "wdio run ./wdio.conf.js",
+    "publish": "electron-forge publish"
   },
+  "productName": "Habanero Spice",
   "author": "Nick, Nathan, Mark, Jonathan",
   "license": "ISC",
   "devDependencies": {
-    "@electron-forge/cli": "^7.5.0",
-    "@electron-forge/maker-deb": "^7.5.0",
+    "@electron-forge/cli": "^7.6.1",
+    "@electron-forge/maker-deb": "^7.6.1",
     "@electron-forge/maker-dmg": "^7.5.0",
-    "@electron-forge/maker-rpm": "^7.5.0",
-    "@electron-forge/maker-squirrel": "^7.5.0",
+    "@electron-forge/maker-rpm": "^7.6.1",
+    "@electron-forge/maker-squirrel": "^7.6.1",
     "@electron-forge/maker-wix": "^7.5.0",
-    "@electron-forge/maker-zip": "^7.5.0",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.5.0",
-    "@electron-forge/plugin-fuses": "^7.5.0",
+    "@electron-forge/maker-zip": "^7.6.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.6.1",
+    "@electron-forge/plugin-fuses": "^7.6.1",
     "@electron-forge/publisher-electron-release-server": "^7.5.0",
+    "@electron-forge/publisher-github": "^7.6.1",
     "@electron/fuses": "^1.8.0",
     "@playwright/test": "^1.48.2",
-    "electron": "^30.5.1"
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "osxSign": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-zip"
-        }
-      ]
-    }
+    "@wdio/cli": "^9.2.8",
+    "@wdio/local-runner": "^9.2.8",
+    "@wdio/mocha-framework": "^9.2.8",
+    "electron": "^30.5.1",
+    "wdio-electron-service": "^7.1.0"
   },
   "dependencies": {
     "chai": "^5.1.2",
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-updater": "^6.3.9"
   },
   "repository": {
     "type": "git",
