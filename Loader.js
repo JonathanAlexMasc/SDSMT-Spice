@@ -5,7 +5,8 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { exec } = require('child_process');
-
+const { updateElectronApp } = require('update-electron-app')
+updateElectronApp()
 
 
 let win;
