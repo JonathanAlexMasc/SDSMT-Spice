@@ -20,8 +20,10 @@ function createWindow() {
       devTools: true
     },
   });
-  win.loadFile('index.html');
+  win.loadFile(path.join(__dirname, 'index.html'));
   win.maximize();
+
+  updateElectronApp();
 }
 
 function loadBuildPage() {
@@ -32,7 +34,7 @@ function loadBuildPage() {
 
 function loadRunPage() {
   if (win) {
-    win.loadFile(path.join(__dirname, 'Waveform.html'));
+    win.loadFile(path.join(__dirname, 'WaveForm.html'));
   }
 }
 
@@ -155,7 +157,7 @@ ipcMain.on('send-netlist-to-waveform', (event, netlistString) => {
   win.webContents.once('did-finish-load', () => {
     win.webContents.send('netlist-to-waveform', netlistString);
   });
-  win.loadFile('WaveForm.html');
+  win.loadFile(path.join(__dirname, 'WaveForm.html'));
 });
 
 ipcMain.handle('save-netlist-to-file', (event, filePath, netlistString) => {
@@ -242,5 +244,3 @@ ipcMain.handle('load-run-page', async (event) => {
   // Load the Run page
   loadRunPage();
 });
-
-updateElectronApp()
