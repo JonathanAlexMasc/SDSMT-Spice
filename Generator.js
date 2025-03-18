@@ -14,7 +14,7 @@ let originalWaveForm = '';
 // Variables for each analysis type
 var startFreq = 1, endFreq = 10000, SimNumPoints = 500; // AC Sweep
 var startVolt = 0, endVolt = 5, step = 0.1; // DC Sweep
-var startTime = 0, stopTime = 5, timeStep = 0.01; // Transient
+var startTime = 1, stopTime = 5, timeStep = 0.1; // Transient
 
 
 const controlSection = '';
@@ -302,7 +302,7 @@ async function ModifyNetlist(filePath) {
         controlSection += `dc ${VoltName} ${startVolt} ${endVolt} ${step}\n`;
         break;
       case 'Transient':
-        controlSection += `tran ${timeStep} ${stopTime}\n`;
+        controlSection += `tran ${timeStep} ${stopTime} ${startTime}\n`;
         break;
       case 'DC OP':
         controlSection += `op\n`;
@@ -350,14 +350,36 @@ async function ModifyNetlist(filePath) {
 
 
 // Pair up voltage probes and format as vdb pairs
-for (let i = 0; i < vProbes.length; i += 2) {
-  if (vProbes[i] == 0) {
-    printString += `print vdb(${vProbes[i + 1]})\n`;
-  } else if (vProbes[i + 1] == 0) {
-    printString += `print vdb(${vProbes[i]})\n`;
-  } else if (vProbes[i] != 0 && vProbes[i + 1] != 0) {
-    printString += `print vdb(${vProbes[i]},${vProbes[i + 1]})\n`;
-  }
+switch (plotType) {
+  case 'ACSweep':
+    for (let i = 0; i < vProbes.length; i += 2) {
+      if (vProbes[i] == 0) {
+        printString += `print vdb(${vProbes[i + 1]})\n`;
+      } else if (vProbes[i + 1] == 0) {
+        printString += `print vdb(${vProbes[i]})\n`;
+      } else if (vProbes[i] != 0 && vProbes[i + 1] != 0) {
+        printString += `print vdb(${vProbes[i]},${vProbes[i + 1]})\n`;
+      }
+    }    
+    break;
+  case 'DCSweep':
+    console.log("DC SWEEP.");
+    break;
+  case 'Transient':
+    for (let i = 0; i < vProbes.length; i += 2) {
+      if (vProbes[i] == 0) {
+        printString += `print v(${vProbes[i + 1]})\n`;
+      } else if (vProbes[i + 1] == 0) {
+        printString += `print v(${vProbes[i]})\n`;
+      } else if (vProbes[i] != 0 && vProbes[i + 1] != 0) {
+        printString += `print v(${vProbes[i]},${vProbes[i + 1]})\n`;
+      }
+    } 
+    console.log("Transient, add volt probes as v() or vr()");
+    break;
+  case 'DC OP':
+    console.log("DC OP");
+    break;
 }
 
 // Add current probes as individual .print lines
@@ -791,7 +813,93 @@ function restoreGraph() {
 
 
 
-function parseTransData(output) { }
+function parseTransData(output) {
+  console.log(output);
+  const lines = output.split('\n');
+  let parseData = false;
+  let headers = []; // Store column labels
+  let dataStore = []; // Store all parsed sections
+  let infoStorage = {
+      'time': [],
+      'value': []
+  }; // Store data dynamically
+
+  for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      // Start parsing after "Transient Analysis"
+      if (line.startsWith('Transient Analysis')) {
+          parseData = true;
+          continue;
+      }
+
+      // Skip irrelevant lines
+      if (!parseData || line === "" || line.startsWith('Warning') || line.startsWith('---')) {
+          continue;
+      }
+
+      // Detect header row (line with "Index" and signal names)
+      if (line.startsWith("Index")) {
+          const newHeaders = line.split(/\s+/).slice(1).filter(header => header.toLowerCase() !== 'time');
+          newHeaders.forEach(header => {
+              if (!headers.includes(header)) {
+                  headers.push(header);
+              }
+          });
+          continue;
+      }
+
+      // Parse numerical data
+      const parts = line.split(/\s+/).filter(part => part !== ''); 
+
+      if (parts.length === 3) { // Ensure sufficient data in the line
+          const index = parseInt(parts[0], 10); // First column is index
+          const time = parseFloat(parts[1]); // Second column is time
+          const value = parseFloat(parts[2]); // Third column is value
+
+          if (!isNaN(index) && !isNaN(time) && !isNaN(value)) {
+              if (index === 0 && infoStorage.time.length > 0) {
+                  // Assign header to the section before storing
+                  let assignedHeader = headers[dataStore.length] || `Unknown-${dataStore.length}`;
+                  dataStore.push({ header: assignedHeader, data: { ...infoStorage } });
+
+                  console.log("Stored Section:", assignedHeader, infoStorage);
+                  
+                  // Reset infoStorage for the next section
+                  infoStorage = { 'time': [], 'value': [] };
+              }
+
+              infoStorage.time.push(time);
+              infoStorage.value.push(value);
+          }
+          continue;
+      }
+
+      // If a 'Note' line is found, store the last section
+      if (line.startsWith('Note')) {
+          if (infoStorage.time.length > 0) {
+              let assignedHeader = headers[dataStore.length] || `Unknown-${dataStore.length}`;
+              dataStore.push({ header: assignedHeader, data: { ...infoStorage } });
+
+              console.log("Stored Section:", assignedHeader, infoStorage);
+          }
+          infoStorage = { 'time': [], 'value': [] };
+          continue;
+      }
+  }
+
+  // Ensure the last section is stored
+  if (infoStorage.time.length > 0) {
+      let assignedHeader = headers[dataStore.length] || `Unknown-${dataStore.length}`;
+      dataStore.push({ header: assignedHeader, data: { ...infoStorage } });
+
+      console.log("Stored Final Section:", assignedHeader, infoStorage);
+  }
+
+  //console.log("Final Parsed Data:", dataStore);
+  return dataStore;
+}
+
 
 function parseDCData(output) { }
 
@@ -942,8 +1050,41 @@ function plotACSweep(parsedData) {
 
 function plotDCSweep(cleanedOutput) { }
 
-function plotTransient(cleanedOutput) { }
+function plotTransient(cleanedOutput) {
+  cleanedOutput.forEach((entry, index) => {
+    if (!entry.data || !entry.data.time || !entry.data.value) {
+        console.warn(`Skipping dataset "${index}" due to missing data.`);
+        return;
+    }
 
+    const dataset = {
+        label: entry.header, // Use the header as the dataset name
+        data: entry.data.time.map((time, i) => ({
+            x: time, // Linear scale on time
+            y: entry.data.value[i]
+        })),
+        borderColor: getRandomColor(index),
+        borderWidth: 0.5,
+        fill: false,
+        xAxisID: 'x-axis-2',
+        yAxisID: 'y-axis-1'
+    };
+
+    chart.options.scales['x-axis-2'] = {
+        title: {
+            display: true,
+            text: 'Time (s)' // Updated to reflect time data
+        },
+        type: 'linear',
+        position: 'bottom' // Time axis at the bottom
+    };
+
+    chart.data.datasets.push(dataset);
+});
+
+// Update the chart to render new datasets
+chart.update();
+}
 
 
 function generateTable(data) {

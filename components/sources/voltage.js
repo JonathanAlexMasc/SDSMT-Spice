@@ -65,7 +65,7 @@ class Volt extends Entities {
     }
 
     updateInfo() {
-        this.info = this.WaveType + " " + this.DCOFFSet + " " + this.Amplitude + " " + this.Frequency + "k" + " AC 1";
+        this.info = this.WaveType + " " + this.DCOFFSet + " " + this.Amplitude + " " + this.Frequency + " AC 1";
         console.log(this.info);
     }
 
@@ -141,7 +141,7 @@ class Volt extends Entities {
 
 
     updateInfo() {
-        this.info = this.WaveType + " " + '(' + this.DCOFFSet + " " + this.Amplitude + " " + this.Frequency + "k" + ')' + " AC 1";
+        this.info = this.WaveType + " " + '(' + this.DCOFFSet + " " + this.Amplitude + " " + this.Frequency + ')' + " AC 1";
         console.log(this.WaveType);
         if (this.WaveType === "SINE") {
             console.log("Were here @ SINE");

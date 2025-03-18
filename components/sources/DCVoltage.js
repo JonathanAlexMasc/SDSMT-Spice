@@ -101,7 +101,7 @@ class DCVolt extends Entities {
     }
 
     updateInfo() {
-        this.info = "DC " + this.VoltageInput + "V";
+        this.info = "DC " + this.VoltageInput;
     }
 
     static resetID() {
@@ -109,7 +109,7 @@ class DCVolt extends Entities {
     }
 }
 
-window.Volt = Volt;
+window.DCVolt = DCVolt;
 
 export function AddDCVoltage(posx, posy) {
     return new DCVolt(posx, posy);
