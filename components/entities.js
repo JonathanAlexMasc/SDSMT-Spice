@@ -138,8 +138,8 @@ class Entities {
 
     blockNodes() {
         this.blockedNodes = [];
-        for (let i = this.intX; i <= this.intX + 60; i += 60) {
-            for (let j = this.intY; j <= this.intY + 60; j += 60) {
+        for (let i = this.intX; i <= this.intX + 60; i += 10) {
+            for (let j = this.intY; j <= this.intY + 60; j += 10) {
                 this.blockedNodes.push([i, j]);
             }
         }

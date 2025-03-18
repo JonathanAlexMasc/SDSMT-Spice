@@ -24,6 +24,14 @@ const circuitData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    const resetZoomBtn = document.getElementById("reset-zoom-btn");
+            if (resetZoomBtn) {
+                resetZoomBtn.click(); // Simulate a click when the page loads
+            } else {
+                console.error("reset-zoom-btn not found!");
+            }
+
     document.getElementById('loadButton').addEventListener('click', async () => {
         const { filePath, fileContent } = await window.electron.openFileDialog();
         if (filePath) {
@@ -476,8 +484,6 @@ function dragElement(elmt) {
             const componentId = button.dataset.componentId;
 
             const rect = button.getBoundingClientRect();
-            updateComponentCoordinates(button, rect.left, rect.top);
-            updateWires(componentId);
         }
     }
 }
@@ -808,7 +814,7 @@ function loadCircuit(savedDataString) {
 function getComponentClass(name) {
     console.log("Component Name in getComponentClass: ", name)
 
-    if (name.includes("VD")) return DCVolt;
+    if (name.startsWith("VD")) return DCVolt;
     if (name.startsWith("V")) return Volt;
     if (name.startsWith("R")) return Resistor;
     if (name.startsWith("L")) return Inductor;
