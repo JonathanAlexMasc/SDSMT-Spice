@@ -244,3 +244,7 @@ ipcMain.handle('load-run-page', async (event) => {
   // Load the Run page
   loadRunPage();
 });
+
+ipcMain.handle('get-logo-path', () => {
+  return path.join(__dirname, 'assets', 'logo.png');
+});

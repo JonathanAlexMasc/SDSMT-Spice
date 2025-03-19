@@ -26,7 +26,8 @@ contextBridge.exposeInMainWorld('electron', {
   },
   loadRunPage: () => {
     ipcRenderer.invoke('load-run-page')
-  }
+  },
+  getLogoPath: () => ipcRenderer.invoke('get-logo-path')
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {

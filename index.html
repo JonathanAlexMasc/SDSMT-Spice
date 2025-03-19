@@ -12,7 +12,7 @@
 <body class="d-flex flex-column min-vh-100">
     <section class="container-fluid py-5 d-flex flex-column flex-grow-1 overflow-auto"
         style="background-color: #4A5D5E;">
-        <img id="my_image" src="./assets/logo.png" alt="image error" class="img-fluid mx-auto w-50 h-auto">
+        <img id="my_image" alt="Image error" class="img-fluid mx-auto w-50 h-auto">
         <p class="info text-white mx-auto fw-bold fs-3">Version: <span id="version"></span></p>
         <div class="d-flex flex-column align-items-center my-2">
             <button id="build" class="btn btn-primary w-25 mb-2" onclick="window.electron.loadBuildPage()">Build</button>
@@ -56,6 +56,9 @@
             console.log('here')
             window.electron.getAppVersion().then(version => {
                 document.getElementById('version').textContent = version;
+            });
+            window.electron.getLogoPath().then((logoPath) => {
+                document.getElementById('my_image').src = `file://${logoPath}`;
             });
         });
     </script>
