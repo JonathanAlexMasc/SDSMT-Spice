@@ -376,8 +376,6 @@ function updateConnectors(component) {
     });
 }
 
-
-
 function AddVoltageProbe() {
     ProbeOn = true;
     wireBlocker = true;
@@ -405,65 +403,110 @@ function updateComponentCoordinates(button, newX, newY) {
     }
 }
 
-function dragElement(elmt) {
+function isOverlappingOtherComponent(elmt) {
+    const currentRect = elmt.getBoundingClientRect();
+    const others = document.querySelectorAll('[data-component-id]');
+    
+    for (let other of others) {
+      // Skip if the other element is inside the same draggable element.
+      if (elmt.contains(other)) continue;
+      
+      const otherRect = other.getBoundingClientRect();
+      // Check if the two rectangles intersect.
+      if (!(currentRect.right < otherRect.left ||
+            currentRect.left > otherRect.right ||
+            currentRect.bottom < otherRect.top ||
+            currentRect.top > otherRect.bottom)) {
+        console.log("isOverlappingOtherComponent: Overlap detected with component", other.dataset.componentId);
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  function dragElement(elmt) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
+    // Store the last valid (non-overlapping) position.
+    let lastValidLeft = elmt.offsetLeft;
+    let lastValidTop = elmt.offsetTop;
+  
     elmt.onmousedown = dragMouseDown;
-
+  
     function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
+      e = e || window.event;
+      e.preventDefault();
+  
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+  
+      document.onmouseup = closeDragElement;
+      document.onmousemove = elementDrag;
     }
-
+  
     function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-
-        elmt.style.top = (elmt.offsetTop - pos2) + "px";
-        elmt.style.left = (elmt.offsetLeft - pos1) + "px";
-
-        const button = elmt.querySelector('button[data-component-id]');
-        if (button) {
-            const componentId = button.dataset.componentId;
-            const rect = button.getBoundingClientRect();
-            updateComponentCoordinates(button, rect.left, rect.top);
-            updateWires(componentId);
+      e = e || window.event;
+      e.preventDefault();
+  
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+  
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+  
+      // Update element's position immediately so the user sees movement.
+      elmt.style.top = (elmt.offsetTop - pos2) + "px";
+      elmt.style.left = (elmt.offsetLeft - pos1) + "px";
+  
+      const button = elmt.querySelector('button[data-component-id]');
+      if (button) {
+        const componentId = button.dataset.componentId;
+        const rect = button.getBoundingClientRect();
+        const snappedPosition = snapToGrid(rect.left, rect.top);
+  
+        // If the dragged element is not overlapping another component, update wires.
+        if (!isOverlappingOtherComponent(elmt)) {
+          updateComponentCoordinates(button, rect.left, rect.top);
+          updateWires(componentId);
+          // Save the current valid position.
+          lastValidLeft = elmt.offsetLeft;
+          lastValidTop = elmt.offsetTop;
+        } else {
+          console.log("elementDrag: Overlap detected; skipping wire update.");
         }
+      }
     }
-
+  
     function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-
-        // Snap to nearest grid position
-        const currentLeft = parseFloat(elmt.style.left);
-        const currentTop = parseFloat(elmt.style.top);
-        const snappedPosition = snapToGrid(currentLeft, currentTop);
-
-        elmt.style.left = snappedPosition.left + "px";
-        elmt.style.top = snappedPosition.top + "px";
-
-        const button = elmt.querySelector('button[data-component-id]');
-        if (button) {
-            const componentId = button.dataset.componentId;
-
-            const rect = button.getBoundingClientRect();
+      document.onmouseup = null;
+      document.onmousemove = null;
+  
+      // Snap to nearest grid position.
+      const currentLeft = parseFloat(elmt.style.left);
+      const currentTop = parseFloat(elmt.style.top);
+      const snappedPosition = snapToGrid(currentLeft, currentTop);
+  
+      const button = elmt.querySelector('button[data-component-id]');
+      if (button) {
+        const componentId = button.dataset.componentId;
+        
+        // Check if the snapped position would overlap another component.
+        if (!isOverlappingOtherComponent(elmt)) {
+          elmt.style.left = snappedPosition.left + "px";
+          elmt.style.top = snappedPosition.top + "px";
+          lastValidLeft = snappedPosition.left;
+          lastValidTop = snappedPosition.top;
+          updateComponentCoordinates(button, snappedPosition.left, snappedPosition.top);
+          
+        } else {
+          console.log("closeDragElement: Overlap detected. Reverting to last valid position.");
+          elmt.style.left = lastValidLeft + "px";
+          elmt.style.top = lastValidTop + "px";
         }
+        updateAllWires();
+      }
     }
-}
-
+  }
+  
 function snapToGrid(left, top) {
     let nearestLeft = findNearest(left, internalGrid.map(pair => pair[0]));
     let nearestTop = findNearest(top, internalGrid.map(pair => pair[1]));
