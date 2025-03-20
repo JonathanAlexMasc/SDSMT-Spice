@@ -207,16 +207,28 @@ class Entities {
     //positional attachers, can change for each class, empty in parent (volt needs a left/right)
     //ground would need just a top etc.
     attachLeft(con) {
-
+        con.style.left = "-10px"; // Adjust as needed to move it to the left of the main button
+        con.style.top = "50%";
+        con.style.transform = "translateY(-50%)";
+        con.classList.add("left-connector");
     }
     attachRight(con) {
-
+        con.style.right = "-10px"; // Adjust as needed to move it to the right of the main button
+        con.style.top = "50%";
+        con.style.transform = "translateY(-50%)";
+        con.classList.add("right-connector");
     }
     attachTop(con) {
-
+        con.style.top = "-9px"; // Adjust as needed to move it above the main button
+        con.style.left = "50%";
+        con.style.transform = "translateX(-50%)";
+        con.classList.add("top-connector");
     }
     attachBot(con) {
-
+        con.style.bottom = "-7px"; // Adjust as needed to move it below the main button
+        con.style.left = "50%";
+        con.style.transform = "translateX(-45%)";
+        con.classList.add("bot-connector");
     }
 
     displayModifiableValues() {

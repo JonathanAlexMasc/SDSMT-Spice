@@ -145,11 +145,10 @@ class OPAMP extends Entities {
             holderBtn.appendChild(con);
             this.attachWireListener(con, con.id);
             this.attachProbeListener(con, con.id);
-            this.attachTop(con);
+            this.attachLeft(con);
             this.Style(con); //makes a connector on the left
             this.connectors.push(con);
         }
-
         for (let i = 0; i < numOutCons; i++) {
             const con = document.createElement("button");
             con.id = this.name + "-connector" + conIDCounter++;
@@ -158,34 +157,21 @@ class OPAMP extends Entities {
             holderBtn.appendChild(con);
             this.attachWireListener(con, con.id);
             this.attachProbeListener(con, con.id);
-            this.attachBot(con); //attaches on the bot
+            this.attachRight(con); //attaches on the bot
             this.Style(con); //styles the connector (adds img, size, etc)
             this.connectors.push(con);
         }
-
-        for (let i = 0; i < numOutCons; i++) {
-            const con = document.createElement("button");
-            con.id = this.name + "-connector" + conIDCounter++;
-            con.className = "out-connector";
-            con.classList.add("out-connector-" + i);
-            holderBtn.appendChild(con);
-            this.attachWireListener(con, con.id);
-            this.attachProbeListener(con, con.id);
-            this.attachLeft(con);
-            this.Style(con);
-            this.connectors.push(con);
-        }
     }
 
-    attachRight(button) {
-        button.style.left = "30px"; // Adjust as needed to move it to the left of the main button
-        button.style.top = "50%";
-        button.style.transform = "translateY(-50%)";
-        button.classList.add("right-connector");
+    attachRight(button2) {
+        button2.style.right = "-10px"; // Adjust as needed to move it to the right of the main button
+        button2.style.top = "50%";
+        button2.style.transform = "translateY(-50%)";
+        button2.classList.add("right-connector");
     }
 
     attachLeft(button) {
-        button.style.left = "-15px"; // Adjust as needed to move it to the left of the main button
+        button.style.left = "-10px"; // Adjust as needed to move it to the left of the main button
         button.style.top = "50%";
         button.style.transform = "translateY(-50%)";
         button.classList.add("left-connector");

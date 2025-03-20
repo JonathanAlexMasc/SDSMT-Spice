@@ -157,6 +157,9 @@ function fabListener(button, rotateButton, deleteButton, clearWiresButton, editB
     console.log("Component Map")
     console.log(componentMap)
 
+    console.log("Component Data")
+    console.log(componentData)
+
     if (rotateButton) {
         rotateButton.addEventListener('click', () => {
             // Update the rotation angle
@@ -166,7 +169,7 @@ function fabListener(button, rotateButton, deleteButton, clearWiresButton, editB
             button.style.transform = `rotate(${currentRotation}deg)`;
     
             // Update connector positions based on new rotation
-            updateConnectors(componentData.connectors);
+            updateConnectors(componentData);
             updateWires(componentId);
 
             console.log("Wires Updated");
@@ -318,39 +321,10 @@ function clearWiresFromComponent(componentId) {
     keysToDelete.forEach(key => {
       connectionMap.delete(key);
     });
-  }
-  
-  
-  
-function attachBot(con) {
-    con.style.bottom = "-7px"; // Adjust as needed to move it below the main button
-    con.style.left = "50%";
-    con.style.transform = "translateX(-45%)";
-    con.classList.add("bot-connector");
-}
-function attachTop(con) {
-    con.style.top = "-9px"; // Adjust as needed to move it above the main button
-    con.style.left = "50%";
-    con.style.transform = "translateX(-50%)";
-    con.classList.add("top-connector");
 }
 
-function attachRight( button2) {
-    button2.style.right = "-10px"; // Adjust as needed to move it to the right of the main button
-    button2.style.top = "50%";
-    button2.style.transform = "translateY(-50%)";
-    button2.classList.add("right-connector");
-}
-
-function attachLeft(button) {
-    button.style.left = "-10px"; // Adjust as needed to move it to the left of the main button
-    button.style.top = "50%";
-    button.style.transform = "translateY(-50%)";
-    button.classList.add("left-connector");
-}
-
-
-function updateConnectors(connectors) {
+function updateConnectors(component) {
+    let connectors = component.connectors;
     console.log("Connectors: ", connectors);
     connectors.forEach(connector => {
         // Store the current class and corresponding transformation
@@ -359,16 +333,18 @@ function updateConnectors(connectors) {
         // Determine the new position and transformation based on the current class
         if (connector.classList.contains('top-connector')) {
             newClass = 'right-connector';
-            transformFunction = attachRight;
+            transformFunction = component.instance.attachRight;
         } else if (connector.classList.contains('bot-connector')) {
             newClass = 'left-connector';
-            transformFunction = attachLeft;
+            transformFunction = component.instance.attachLeft;
         } else if (connector.classList.contains('left-connector')) {
             newClass = 'top-connector';
-            transformFunction = attachTop;
+            transformFunction = component.instance.attachTop;
         } else if (connector.classList.contains('right-connector')) {
             newClass = 'bot-connector';
-            transformFunction = attachBot;
+            console.log("attachRight function")
+            console.log(component.instance.attachRight)
+            transformFunction = component.instance.attachBot;
         }
 
         // Remove previous positions and transformations
