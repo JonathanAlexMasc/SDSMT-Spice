@@ -24,14 +24,6 @@ const circuitData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    const resetZoomBtn = document.getElementById("reset-zoom-btn");
-            if (resetZoomBtn) {
-                resetZoomBtn.click(); // Simulate a click when the page loads
-            } else {
-                console.error("reset-zoom-btn not found!");
-            }
-
     document.getElementById('loadButton').addEventListener('click', async () => {
         const { filePath, fileContent } = await window.electron.openFileDialog();
         if (filePath) {
