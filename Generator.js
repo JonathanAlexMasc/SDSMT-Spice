@@ -289,8 +289,17 @@ async function ModifyNetlist(filePath) {
     // Initialize the control section and find probes
     let controlSection = `.control\n`;
     let probeLines = [];
+
+
     const lines = existingContent.split('\n');
 
+    for (let line of lines) {
+      let parts = line.trim().split(/\s+/); // Split by spaces/tabs
+      if (parts.length > 1 && parts[0].match(/^[Vv][A-Za-z0-9]*$/)) {
+          VoltName = parts[0]; // The first part is the voltage source name
+          break;
+      }
+  }
 
     console.log('plotType:', plotType);
     // Add control commands based on plotType
@@ -363,6 +372,15 @@ switch (plotType) {
     }    
     break;
   case 'DCSweep':
+    for (let i = 0; i < vProbes.length; i += 2) {
+      if (vProbes[i] == 0) {
+        printString += `print v(${vProbes[i + 1]})\n`;
+      } else if (vProbes[i + 1] == 0) {
+        printString += `print v(${vProbes[i]})\n`;
+      } else if (vProbes[i] != 0 && vProbes[i + 1] != 0) {
+        printString += `print v(${vProbes[i]},${vProbes[i + 1]})\n`;
+      }
+    }
     console.log("DC SWEEP.");
     break;
   case 'Transient':
@@ -670,6 +688,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const validNetlist = validateNetlist(content); // Call the validateNetlist function to check the validity of the netlist
 
+      let outPutType = document.getElementById('OutSelector').value;
+
       if (validNetlist === 1) {
         try {
           ModifyNetlist(filePath);
@@ -679,26 +699,51 @@ document.addEventListener('DOMContentLoaded', async () => {
           console.log(rawOutput);
           switch (plotType) {
             case 'Transient':
-              //restoreGraph();
               cleanedOutput = parseTransData(rawOutput);
-              plotTransient(cleanedOutput); //graph
+              if(outPutType == 'Table') {
+                console.log('Table');
+                GenerateTransientTable(cleanedOutput);
+              }
+              else if(outPutType == 'Graph') {
+                console.log('Graph');
+                plotTransient(cleanedOutput); //graph
+              }
               break;
             case 'ACSweep':
               //restoreGraph();
               cleanedOutput = parseACSweepData(rawOutput);
-              plotACSweep(cleanedOutput); //graph
+              if(outPutType == 'Table') {
+                console.log('Table');
+                GenerateACSweepTable(cleanedOutput);
+              }
+              else if(outPutType == 'Graph') {
+                console.log('Graph');
+                plotACSweep(cleanedOutput); //graph
+              }
               break;
             case 'DC OP':
               cleanedOutput = parseDCOPData(rawOutput);
-              plotDCOP(cleanedOutput); //table
+              if(outPutType == 'Table') {
+                console.log('Table');
+                plotDCOP(cleanedOutput); //table
+              }
+              else if(outPutType == 'Graph') {
+                alert("DC OP Graph not supported, please use table output instead");
+              }
               break;
             case 'DCSweep':
               //restoreGraph();
               cleanedOutput = parseDCData(rawOutput);
-              plotDCSweep(cleanedOutput); //unknown
+              if(outPutType == 'Table') {
+                console.log('Table');
+                GenerateDCSweepTable(cleanedOutput);
+              }
+              else if(outPutType == 'Graph') {
+                console.log('Graph');
+                plotDCSweep(cleanedOutput); //unknown
+              }
               break;
           }
-          //plotFromNgspiceOutput(output);
         } catch (error) {
           // Display the error in a popup
           alert(`Error from ngspice: ${error.message || error}`);
@@ -713,19 +758,49 @@ document.addEventListener('DOMContentLoaded', async () => {
           switch (plotType) {
             case 'Transient':
               cleanedOutput = parseTransData(rawOutput);
-              plotTransient(cleanedOutput); //graph
+              if(outPutType == 'Table') {
+                console.log('Table');
+                //MakeTranTable(cleanedOutput);
+              }
+              else if(outPutType == 'Graph') {
+                console.log('Graph');
+                plotTransient(cleanedOutput); //graph
+              }
               break;
             case 'ACSweep':
+              //restoreGraph();
               cleanedOutput = parseACSweepData(rawOutput);
-              plotACSweep(cleanedOutput); //graph
+              if(outPutType == 'Table') {
+                console.log('Table');
+                //MakeACTable(cleanedOutput);
+              }
+              else if(outPutType == 'Graph') {
+                console.log('Graph');
+                plotACSweep(cleanedOutput); //graph
+              }
               break;
             case 'DC OP':
               cleanedOutput = parseDCOPData(rawOutput);
-              plotDCOP(cleanedOutput); //table
+              if(outPutType == 'Table') {
+                console.log('Table');
+                plotDCOP(cleanedOutput); //table
+                //MakeDCOPTable(cleanedOutput);
+              }
+              else if(outPutType == 'Graph') {
+                alert("DC OP Graph not supported, please use table output instead");
+              }
               break;
             case 'DCSweep':
-              cleanedOutput = parseDCSweepData(rawOutput);
-              plotDCSweep(cleanedOutput); //unknown
+              //restoreGraph();
+              cleanedOutput = parseDCData(rawOutput);
+              if(outPutType == 'Table') {
+                console.log('Table');
+                //MakeDCSweepTable(cleanedOutput);
+              }
+              else if(outPutType == 'Graph') {
+                console.log('Graph');
+                plotDCSweep(cleanedOutput); //unknown
+              }
               break;
           }
         } catch (error) {
@@ -901,7 +976,87 @@ function parseTransData(output) {
 }
 
 
-function parseDCData(output) { }
+function parseDCData(output) {
+  console.log(output);
+  const lines = output.split('\n');
+  let parseData = false;
+  let headers = []; // Store column labels
+  let dataStore = []; // Store all parsed sections
+  let infoStorage = {
+      'v-sweep': [],
+      'value': []
+  }; // Store data dynamically
+
+  for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      // Start parsing after detecting "DC transfer characteristic"
+      if (line.includes('DC transfer characteristic')) {
+          parseData = true;
+          continue;
+      }
+
+      // Skip irrelevant lines
+      if (!parseData || line === "" || line.startsWith('Warning') || line.startsWith('---') || line.startsWith('No. of Data Rows')) {
+          continue;
+      }
+
+      // Detect header row (line with "Index" and signal names)
+      if (line.startsWith("Index")) {
+          const newHeaders = line.split(/\s+/).slice(1); // Exclude "Index"
+          headers = newHeaders;
+          continue;
+      }
+
+      // Parse numerical data
+      const parts = line.split(/\s+/).filter(part => part !== ''); 
+
+      if (parts.length === headers.length + 1) { // Ensure it matches column count
+          const index = parseInt(parts[0], 10); // First column is index
+          const vSweep = parseFloat(parts[1]); // Second column is sweep voltage
+          const value = parseFloat(parts[2]); // Third column is value
+
+          if (!isNaN(index) && !isNaN(vSweep) && !isNaN(value)) {
+              if (index === 0 && infoStorage['v-sweep'].length > 0) {
+                  // Assign header to the section before storing
+                  let assignedHeader = headers[dataStore.length] || `Unknown-${dataStore.length}`;
+                  dataStore.push({ header: assignedHeader, data: { ...infoStorage } });
+
+                  console.log("Stored Section:", assignedHeader, infoStorage);
+                  
+                  // Reset infoStorage for the next section
+                  infoStorage = { 'v-sweep': [], 'value': [] };
+              }
+
+              infoStorage['v-sweep'].push(vSweep);
+              infoStorage['value'].push(value);
+          }
+          continue;
+      }
+
+      // If a 'Note' or circuit name line is found, store the last section
+      if (line.startsWith('Note') || line.includes('Circuit:')) {
+          if (infoStorage['v-sweep'].length > 0) {
+              let assignedHeader = headers[dataStore.length] || `Unknown-${dataStore.length}`;
+              dataStore.push({ header: assignedHeader, data: { ...infoStorage } });
+
+              console.log("Stored Section:", assignedHeader, infoStorage);
+          }
+          infoStorage = { 'v-sweep': [], 'value': [] };
+          continue;
+      }
+  }
+
+  // Ensure the last section is stored
+  if (infoStorage['v-sweep'].length > 0) {
+      let assignedHeader = headers[dataStore.length] || `Unknown-${dataStore.length}`;
+      dataStore.push({ header: assignedHeader, data: { ...infoStorage } });
+
+      console.log("Stored Final Section:", assignedHeader, infoStorage);
+  }
+
+  return dataStore;
+}
 
 function parseDCOPData(output) {
     const lines = output.split("\n");
@@ -1048,7 +1203,43 @@ function plotACSweep(parsedData) {
   chart.update();
  }
 
-function plotDCSweep(cleanedOutput) { }
+ function plotDCSweep(cleanedOutput) {
+  console.log(cleanedOutput);
+  cleanedOutput.forEach((entry, index) => {
+      if (!entry.data || !entry.data['v-sweep'] || !entry.data.value) {
+          console.warn(`Skipping dataset "${index}" due to missing data.`);
+          return;
+      }
+
+      const dataset = {
+          label: entry.header, // Use the header as the dataset name
+          data: entry.data['v-sweep'].map((v, i) => ({
+              x: v, // Use voltage sweep values for X
+              y: entry.data.value[i]
+          })),
+          borderColor: getRandomColor(index),
+          borderWidth: 0.5,
+          fill: false,
+          xAxisID: 'x-axis-2',
+          yAxisID: 'y-axis-1'
+      };
+
+      chart.options.scales['x-axis-2'] = {
+          title: {
+              display: true,
+              text: 'V-Sweep (V)' // Updated to reflect voltage sweep
+          },
+          type: 'linear',
+          position: 'bottom' // Keep x-axis at the bottom
+      };
+
+      chart.data.datasets.push(dataset);
+  });
+
+  // Update the chart to render new datasets
+  chart.update();
+}
+
 
 function plotTransient(cleanedOutput) {
   cleanedOutput.forEach((entry, index) => {
@@ -1101,6 +1292,14 @@ function generateTable(data) {
     return tableHtml;
 }
 
+function GenerateACSweepTable(data) {
+}
+
+function GenerateDCSweepTable(data) {
+}
+
+function GenerateTransientTable(data) {
+}
 
 
 function removeAndReplaceControlSection(existingContent, controlSection) {
