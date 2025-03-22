@@ -145,7 +145,7 @@ class OPAMP extends Entities {
             holderBtn.appendChild(con);
             this.attachWireListener(con, con.id);
             this.attachProbeListener(con, con.id);
-            this.attachLeft(con);
+            this.attachLeft(con, numInCons, i);
             this.Style(con); //makes a connector on the left
             this.connectors.push(con);
         }
@@ -157,24 +157,77 @@ class OPAMP extends Entities {
             holderBtn.appendChild(con);
             this.attachWireListener(con, con.id);
             this.attachProbeListener(con, con.id);
-            this.attachRight(con); //attaches on the bot
+            this.attachRight(con, numOutCons, i); //attaches on the bot
             this.Style(con); //styles the connector (adds img, size, etc)
             this.connectors.push(con);
         }
     }
 
-    attachRight(button2) {
-        button2.style.right = "-10px"; // Adjust as needed to move it to the right of the main button
-        button2.style.top = "50%";
-        button2.style.transform = "translateY(-50%)";
-        button2.classList.add("right-connector");
+    attachRight(con, numCons, i) {
+        if (numCons == 2) {
+            if (i == 0) {
+                con.style.top = "25%";
+            }
+            else {
+                con.style.top = "75%";
+            }
+        }
+
+        else {
+            con.style.top = "50%";
+        }
+
+        con.style.right = "-10px";
+        con.style.transform = "translateY(-50%)";
+        con.classList.add("right-connector");
     }
 
-    attachLeft(button) {
-        button.style.left = "-10px"; // Adjust as needed to move it to the left of the main button
-        button.style.top = "50%";
-        button.style.transform = "translateY(-50%)";
-        button.classList.add("left-connector");
+    attachLeft(con, numCons, i) {
+        if (numCons == 2) {
+            if (i == 0) {
+                con.style.top = "25%";
+            } else {
+                con.style.top = "75%";
+            }
+        } else {
+            con.style.top = "50%";
+        }
+
+        con.style.left = "-10px"; // Adjust as needed to move it to the left of the main button
+        con.style.transform = "translateY(-50%)";
+        con.classList.add("left-connector");
+    }
+
+    attachTop(con, numCons, i) {
+        if (numCons == 2) {
+            if (i == 0) {
+                con.style.left = "25%";
+            } else {
+                con.style.left = "75%";
+            }
+        } else {
+            con.style.left = "50%";
+        }
+
+        con.style.top = "-9px"; // Adjust as needed to move it above the main button
+        con.style.transform = "translateX(-50%)";
+        con.classList.add("top-connector");
+    }
+
+    attachBot(con, numCons, i) {
+        if (numCons == 2) {
+            if (i == 0) {
+                con.style.left = "25%";
+            } else {
+                con.style.left = "75%";
+            }
+        } else {
+            con.style.left = "50%";
+        }
+
+        con.style.bottom = "-7px"; // Adjust as needed to move it below the main button
+        con.style.transform = "translateX(-50%)";
+        con.classList.add("bot-connector");
     }
 
     displayModifiableValues() {

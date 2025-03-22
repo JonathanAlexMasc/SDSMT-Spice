@@ -315,57 +315,99 @@ function clearWiresFromComponent(componentId) {
     });
 }
 
+function getConnectionsPerSide(connectors) {
+  let connections = { top: 0, bottom: 0, left: 0, right: 0 };
+
+  connectors.forEach(connector => {
+    if (connector.classList.contains("top-connector")) {
+      connections.top++;
+    } else if (connector.classList.contains("bot-connector")) {
+      connections.bottom++;
+    } else if (connector.classList.contains("left-connector")) {
+      connections.left++;
+    } else if (connector.classList.contains("right-connector")) {
+      connections.right++;
+    }
+  });
+
+  return connections;
+}
+
+function filterConnectorsBySide(connectors, side) {
+  return connectors.filter(connector => connector.classList.contains(`${side}-connector`));
+}
+
+function attachUpdatedConnectors(component, conectorsArr) {
+
+  const rightConnectors = filterConnectorsBySide(conectorsArr, "right");
+  const leftConnectors = filterConnectorsBySide(conectorsArr, "left");
+  const topConnectors = filterConnectorsBySide(conectorsArr, "top");
+  const bottomConnectors = filterConnectorsBySide(conectorsArr, "bot");
+
+  for (let i = 0; i < leftConnectors.length; i++) {
+    component.instance.attachLeft(leftConnectors[i], leftConnectors.length, i);
+  }
+
+  for (let i = 0; i < rightConnectors.length; i++) {
+    component.instance.attachRight(rightConnectors[i], rightConnectors.length, i);
+  }
+
+  for (let i = 0; i < topConnectors.length; i++) {
+    component.instance.attachTop(topConnectors[i], topConnectors.length, i);
+  }
+
+  for (let i = 0; i < bottomConnectors.length; i++) {
+    component.instance.attachBot(bottomConnectors[i], bottomConnectors.length, i);
+
+    console.log("Bottom Style: ", bottomConnectors[i].style)
+  }
+}
+
 function updateConnectors(component) {
-    let connectors = component.connectors;
-    console.log("Connectors: ", connectors);
-    connectors.forEach(connector => {
-        // Store the current class and corresponding transformation
-        let newClass = '';
-        let transformFunction = null;
-        // Determine the new position and transformation based on the current class
-        if (connector.classList.contains('top-connector')) {
-            newClass = 'right-connector';
-            transformFunction = component.instance.attachRight;
-        } else if (connector.classList.contains('bot-connector')) {
-            newClass = 'left-connector';
-            transformFunction = component.instance.attachLeft;
-        } else if (connector.classList.contains('left-connector')) {
-            newClass = 'top-connector';
-            transformFunction = component.instance.attachTop;
-        } else if (connector.classList.contains('right-connector')) {
-            newClass = 'bot-connector';
-            console.log("attachRight function")
-            console.log(component.instance.attachRight)
-            transformFunction = component.instance.attachBot;
-        }
+  let connectors = component.connectors;
+  console.log("Component: ", component);
+  console.log("Connectors Pre Rotation: ", connectors);
+  connectors.forEach(connector => {
+    // Store the current class and corresponding transformation
+    let newClass = '';
 
-        // Remove previous positions and transformations
-        connector.style.top = '';
-        connector.style.bottom = '';
-        connector.style.left = '';
-        connector.style.right = '';
-        connector.style.transform = '';
+    // Determine the new position and transformation based on the current class
+    if (connector.classList.contains('top-connector')) {
+        newClass = 'right-connector';
+    } else if (connector.classList.contains('bot-connector')) {
+        newClass = 'left-connector';
+    } else if (connector.classList.contains('left-connector')) {
+        newClass = 'top-connector';
+    } else if (connector.classList.contains('right-connector')) {
+        newClass = 'bot-connector';
+    }
 
-        // Apply the transformation and update the class
-        if (transformFunction) {
-            transformFunction(connector);
-        
-            // Define a regex pattern to match classes of the form 'dir-connector'
-            const pattern = /^.*-connector$/;
-        
-            // Remove the class matching the pattern
-            connector.classList.forEach(cls => {
-                if (pattern.test(cls)) {
-                    connector.classList.remove(cls);
-                }
-            });
-        
-            // Add the new class
-            connector.classList.add(newClass);
-        }
+    // Remove previous positions and transformations
+    connector.style.top = '';
+    connector.style.bottom = '';
+    connector.style.left = '';
+    connector.style.right = '';
+    connector.style.transform = '';
 
-        console.log(`componentMap in updateConnectors: ${componentMap}`);
+    // Define a regex pattern to match classes of the form 'dir-connector'
+    const pattern = /^.*-connector$/;
+
+    // Remove the class matching the pattern
+    connector.classList.forEach(cls => {
+      if (pattern.test(cls)) {
+        connector.classList.remove(cls);
+      }
     });
+
+    // Add the new class
+    connector.classList.add(newClass);
+
+    console.log(`componentMap in updateConnectors: ${componentMap}`);
+  });
+
+  console.log("Connectors Post Rotation: ", connectors);
+
+  attachUpdatedConnectors(component, connectors);
 }
 
 function AddVoltageProbe() {
