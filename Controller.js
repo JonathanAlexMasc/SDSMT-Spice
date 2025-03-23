@@ -563,6 +563,9 @@ function generateNetlist() {
 
     // Diode Models
     const models = []
+  
+    // OpAmps
+    const subckts = []
 
     // Loop through each component in the componentMap
     componentMap.forEach((componentData, componentId) => {
@@ -578,13 +581,24 @@ function generateNetlist() {
                 netlist += " " + componentInstance.equation + ' ' + componentInstance.info + '\n';
             }
             else {
-                // Otherwise, add it to the array of non-Voltage components
-                nonVoltageComponents.push(componentInstance.equation);
+              // Otherwise, add it to the array of non-Voltage components
+              nonVoltageComponents.push(componentInstance.equation);
             }
 
             // push models 
             if (componentInstance.hasModel) {
-                models.push(componentInstance.model)
+              models.push(componentInstance.model)
+            }
+          
+            if (componentInstance.hasSubckt) {
+              // only handling opAmps for now
+              let opAmpInfo = {};
+              opAmpInfo.subckt = componentInstance.subckt;
+              opAmpInfo.inStage = componentInstance.inStage;
+              opAmpInfo.midStage = componentInstance.midStage;
+              opAmpInfo.outStage = componentInstance.outStage;
+
+              subckts.push(opAmpInfo);
             }
         }
     });
@@ -597,6 +611,13 @@ function generateNetlist() {
     models.forEach(model => {
         netlist += model + '\n';
     })
+  
+    subckts.forEach(op => {
+      netlist += '\n' + op.subckt + '\n';
+      netlist += '\n' + op.inStage + '\n';
+      netlist += '\n' + op.midStage + '\n';
+      netlist += '\n' + op.outStage + '\n';
+      })
 
     // Now cycle through ProbeMap and grab all probe equations
     probeMap.forEach((probeInstance, probeName) => {

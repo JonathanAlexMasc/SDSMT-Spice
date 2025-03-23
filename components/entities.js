@@ -14,6 +14,7 @@ class Entities {
         this.connectors = [];
         this.blockedNodes = [];
         this.hasModel = false;            // Parameter for model presence, false default
+        this.hasSubckt = false;
         //this.blockNodes();
         //this.buildComponent();
     }

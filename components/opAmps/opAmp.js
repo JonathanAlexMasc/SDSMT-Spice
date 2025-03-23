@@ -9,11 +9,7 @@ class OPAMP extends Entities {
         this.intY = parseInt(this.y, 10);
         this.name = "xU" + ++OPAMP.OpAmpID;
         this.imgSrc = "images/OpAmp/opAmp.svg";
-
-        this.modelName = `xMODU${OPAMP.OpAmpID}`
-        this.info = this.modelName;
-        this.equation = this.name;
-        this.Currconnections = [];
+        this.hasSubckt = true;
 
         // OpAmp Model Props
         this.VOS = 0;
@@ -26,20 +22,27 @@ class OPAMP extends Entities {
         this.VOMP = 12;
         this.VOMN = -12;
 
+        // Modelling
+        this.shortModelName = `xMODU${OPAMP.OpAmpID}`
+        this.modelName = `xMODU${OPAMP.OpAmpID} PARAMS: VOS=${this.VOS} IBS=${this.IBS} IOS=${this.IOS} AVOL=${this.AVOL} BW=${this.BW} RI=${this.RI} RO=${this.RO} VOMP=${this.VOMP} VOMN=${this.VOMN}`
+
+        this.info = this.modelName
+        this.equation = this.name;
+        this.Currconnections = [];
+
         // Subcircuit
-        this.subckt = `.SUBCKT ${this.modelName} in_pos in_neg out PARAMS: AVOL=500k BW=10Meg RI=10Meg RO=0 VOS=0 IBS=0 IOS=0 VOMP=15 VOMN=-15`
+        this.subckt = `.SUBCKT ${this.shortModelName} in_pos in_neg out PARAMS: AVOL=500k BW=10Meg RI=10Meg RO=0 VOS=0 IBS=0 IOS=0 VOMP=15 VOMN=-15`
 
         // input stage
         this.inStage = `VOS in_pos 4 ${this.VOS}\nIbias1 4 0 ${this.IBS}\nIbias2 4 0 ${this.IBS}\nIos 4 in_neg ${this.IOS/2}\nRin 4 in_neg ${this.RI}`
         
         // middle stage
-        this.midStage = `Bgain 0 6 I=v(4,in_neg)*${this.AVOL}/1meg\nR1 6 0 1meg\nCP1 6 0 ${this.AVOL}/(2*pi*1meg*${this.BW})\nVpos 9 0 ${this.VOMP}\nDlimit_pos 6 9 d1\nVneg 10 0 ${this.VOMN}\nDlimit_neg 10 6 d1\n.model d1 d(n=0.1)`
+        this.midStage = `Bgain 0 6 I={v(4,in_neg)*${this.AVOL}/1meg}\nR1 6 0 1meg\nCP1 6 0 {${this.AVOL}/(2*3.142*1meg*${this.BW})}\nVpos 9 0 ${this.VOMP}\nDlimit_pos 6 9 d1\nVneg 10 0 ${this.VOMN}\nDlimit_neg 10 6 d1\n.model d1 d(n=0.1)`
 
         // output stage
         this.outStage = `E2 7 0 6 0 1\nRout 7 out ${this.RO}\n.ends`
 
         // component building 
-        this.hasModel = true;
         this.numInCons = 2;
         this.numOutCons = 1;
         this.style = `/* Modal Styling */
