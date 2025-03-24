@@ -130,6 +130,30 @@ ipcMain.handle('save-circuit', async (event, circuitData) => {
   }
 });
 
+ipcMain.handle('Save-Raw-Output', async (event, data) => {
+  const { filePath } = await dialog.showSaveDialog({
+    defaultPath: 'RawData.txt',
+    filters: [{ name: 'Output Files', extensions: ['txt'] }],
+  });
+
+  if (filePath) {
+    try {
+      // Prepare circuit data to save
+      const dataToSave = data;
+
+      // Write data to file
+      fs.writeFileSync(filePath, dataToSave);
+      console.log(`File saved successfully at ${filePath}`);
+      return { success: true, filePath };
+    } catch (error) {
+      console.error(`Failed to save file: ${error.message}`);
+      return { success: false, error: error.message };
+    }
+  } else {
+    return { success: false, error: 'File save operation cancelled.' };
+  }
+});
+
 ipcMain.handle('read-file', (event, filePath) => {
   try {
     const data = fs.readFileSync(filePath, 'utf8');
