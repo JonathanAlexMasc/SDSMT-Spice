@@ -118,7 +118,7 @@ class Entities {
         infoBox.style.fontSize = "12px";
         infoBox.style.whiteSpace = "nowrap";
         infoBox.innerText = `${this.name}`; // Set the info text
-        if (this.info) {
+        if (!this.hasModel && !this.hasSubckt && this.info) {
             infoBox.innerText += `, ${this.info}`;
         }
         if (this.unit) {
