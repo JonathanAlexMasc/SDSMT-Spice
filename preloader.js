@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('electron', {
   getAppVersion: () => ipcRenderer.invoke('get-version'),
   openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
   saveCircuit: (data) => ipcRenderer.invoke('save-circuit', data),
+  SaveRawOutput: (data) => ipcRenderer.invoke('Save-Raw-Output', data),
   simulateCircuit: (filePath) => ipcRenderer.invoke('simulate-circuit', filePath),
   readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),
   writeFile: (filePath, data) => ipcRenderer.invoke('write-file', { filePath, data }),

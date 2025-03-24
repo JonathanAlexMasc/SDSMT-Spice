@@ -6,10 +6,14 @@ var xData = [];
 var yData = [];
 var dx = 2 * Math.PI / numPoints;
 var plotType = 'ACSweep';
+let controlSwitch = false;
+let RawData = '';
 var VoltName = '';
 const maxPoints = 7000;
 
 let originalWaveForm = '';
+let nodeValMap = new Map();
+let nodeValCurrMap = new Map();
 
 // Variables for each analysis type
 var startFreq = 1, endFreq = 10000, SimNumPoints = 500; // AC Sweep
@@ -277,6 +281,116 @@ async function writeFile(filePath, data) {
   }
 }
 
+function makeControlSection() {
+  let ctrlSection = '';
+  ctrlSection += '.control\n';
+
+  switch (plotType) {
+    case 'ACSweep':
+      ctrlSection += `ac dec ${SimNumPoints} ${startFreq} ${endFreq} \n`;
+      break;
+    case 'DCSweep':
+      ctrlSection += `dc ${VoltName} ${startVolt} ${endVolt} ${step}\n`;
+      break;
+    case 'Transient':
+      ctrlSection += `tran ${timeStep} ${stopTime} ${startTime}\n`;
+      break;
+    case 'DC OP':
+      ctrlSection += `op\n`;
+      ctrlSection += `print all\n`;
+      break;
+  }
+
+  return ctrlSection;
+}
+
+function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
+  let printLines = '';
+  if (controlSectionSwitch) {
+    
+    nodeValMap.forEach((_, nodeVal) => {  // We don't need the value, just the key (nodeVal)
+      switch (plotType) {
+        case 'ACSweep':
+          printLines += `print vdb(${nodeVal})\n`;
+          break;
+        case 'DCSweep':
+          printLines += `print v(${nodeVal})\n`;
+          break;
+        case 'Transient':
+          printLines += `print v(${nodeVal})\n`;
+          break;
+        case 'DC OP':
+          printLines += `print all\n`;
+          break;
+      }
+    });
+
+    nodeValCurrMap.forEach((_, nodeVal) => {  // We don't need the value, just the key (nodeVal)
+      printLines += `print i(${nodeVal})\n`;
+    });
+    return printLines;
+  }
+  else if (!controlSectionSwitch) {
+    switch (plotType) {
+      case 'ACSweep':
+        //volt probes
+        for (let i = 0; i < voltProbes.length; i += 2) {
+          if (voltProbes[i] == 0) {
+            printLines += `print vdb(${voltProbes[i + 1]})\n`;
+          } else if (voltProbes[i + 1] == 0) {
+            printLines += `print vdb(${voltProbes[i]})\n`;
+          } else if (voltProbes[i] != 0 && voltProbes[i + 1] != 0) {
+            printLines += `print vdb(${voltProbes[i]})\n`;
+            printLines += `print vdb(${voltProbes[i + 1]})\n`;
+          }
+        }
+        //current probes
+        for (let i = 0; i < currentProbes.length; i += 2) {
+          if (currentProbes[i] == 0) {
+            //cant be 0
+            console.log("Current probe is 0, do not add");
+          }
+          else {
+            printLines += `print i(${currentProbes[i]})\n`;
+          }
+        }
+        break;
+      case 'DCSweep':
+        for (let i = 0; i < voltProbes.length; i += 2) {
+          if (voltProbes[i] == 0) {
+            printLines += `print v(${voltProbes[i + 1]})\n`;
+          } else if (vProbes[i + 1] == 0) {
+            printLines += `print v(${voltProbes[i]})\n`;
+          } else if (voltProbes[i] != 0 && voltProbes[i + 1] != 0) {
+            printLines += `print v(${voltProbes[i]})\n`;
+            printLines += `print v(${voltProbes[i + 1]})\n`;
+          }
+        }
+        //console.log("DC SWEEP.");
+        break;
+      case 'Transient':
+        for (let i = 0; i < voltProbes.length; i += 2) {
+          if (voltProbes[i] == 0) {
+            printLines += `print v(${voltProbes[i + 1]})\n`;
+          } else if (voltProbes[i + 1] == 0) {
+            printLines += `print v(${voltProbes[i]})\n`;
+          } else if (voltProbes[i] != 0 && voltProbes[i + 1] != 0) {
+            printLines += `print v(${voltProbes[i]})\n`;
+            printLines += `print v(${voltProbes[i + 1]})\n`;
+          }
+        } 
+        //console.log("Transient, add volt probes as v() or vr()");
+        break;
+      case 'DC OP':
+        printLines += `print all\n`;
+        //console.log("DC OP");
+        break;
+    }
+    return printLines;
+  }
+  
+}
+
 
 async function ModifyNetlist(filePath) {
   try {
@@ -284,11 +398,49 @@ async function ModifyNetlist(filePath) {
     const waveFormToggle = document.getElementById('toggleWaveform');
     let toggleWave = waveFormToggle.checked;
     let existingContent = await readFile(filePath);
-    let updatedContent = existingContent;
 
-    // Initialize the control section and find probes
-    let controlSection = `.control\n`;
     let probeLines = [];
+
+    if(existingContent.includes('.control')){
+      //control section already made
+      //save nodes inside print lines
+      //remove control section
+
+      // Regex to find print lines (e.g., print vdb(1,2), print v(3,4) or print all)
+      const printRegex = /^\s*print.*$/gm;  
+      const printLines = existingContent.match(printRegex);
+
+      // Find all print lines and store them in a map called nodeValMap
+      printLines.forEach(line => {
+        if (line.startsWith('print v')) {
+          let nodeVal = line.split('(')[1].split(')')[0];
+          nodeValMap.set(nodeVal, line);
+        }
+      });
+
+      printLines.forEach(line => {
+        if (line.startsWith('print vdb')) {
+          let nodeVal = line.split('(')[1].split(')')[0];
+          nodeValMap.set(nodeVal, line);
+        }
+      });
+
+      printLines.forEach(line => {
+        if (line.startsWith('print i')) {
+          let nodeVal = line.split('(')[1].split(')')[0];
+          nodeValCurrMap.set(nodeVal, line);
+        }
+      })
+
+      existingContent = existingContent.replace(/\.control[\s\S]*/m, '');
+
+
+
+
+      controlSwitch = true;
+    }
+
+    
 
 
     const lines = existingContent.split('\n');
@@ -301,52 +453,43 @@ async function ModifyNetlist(filePath) {
       }
   }
 
-    console.log('plotType:', plotType);
-    // Add control commands based on plotType
-    switch (plotType) {
-      case 'ACSweep':
-        controlSection += `ac dec ${SimNumPoints} ${startFreq} ${endFreq} \n`;
-        break;
-      case 'DCSweep':
-        controlSection += `dc ${VoltName} ${startVolt} ${endVolt} ${step}\n`;
-        break;
-      case 'Transient':
-        controlSection += `tran ${timeStep} ${stopTime} ${startTime}\n`;
-        break;
-      case 'DC OP':
-        controlSection += `op\n`;
-        controlSection += `print all\n`;
-        break;
+  //This gives us .control
+  //+ simulation type
+  let controlSection = makeControlSection();
+
+
+  // Remove --partial line, replace it with modified netlist
+  existingContent = existingContent.replace(/^\s*--partial\s*[\r\n]*/m, 'Modified Netlist \n');
+
+  //==========================================================================================================
+  //FOR WAVEFORM INPUT, DO NOT TOUCH UNTIL READY
+  //==========================================================================================================
+  if (toggleWave) {
+    const waveformRegex = /(SINE|SQUARE|TRIANGLE|SAWTOOTH)\s*\(\s*[\d.+-]+\s+[\d.+-]+\s+[\d.+-]+k\s*\)/;
+    if (originalWaveForm == '') {
+      const match = updatedContent.match(waveformRegex);
+      originalWaveForm = match ? match[0] : "";  // Save original if found, otherwise empty
+      console.log("Original Waveform:", originalWaveForm);
     }
 
-    // Remove --partial line
-    existingContent = existingContent.replace(/^\s*--partial\s*[\r\n]*/m, 'Modified Netlist \n');
+    let newWaveform = toggleWave ? `${selectedShape} (${dcOff} ${amplitude} ${frequency}k)` : originalWaveForm;
+    existingContent = existingContent.replace(waveformRegex, newWaveform);
+    existingContent = existingContent.trim();
+  }
+  //==========================================================================================================
 
-
-    if (toggleWave) {
-      const waveformRegex = /(SINE|SQUARE|TRIANGLE|SAWTOOTH)\s*\(\s*[\d.+-]+\s+[\d.+-]+\s+[\d.+-]+k\s*\)/;
-      if (originalWaveForm == '') {
-        const match = updatedContent.match(waveformRegex);
-        originalWaveForm = match ? match[0] : "";  // Save original if found, otherwise empty
-        console.log("Original Waveform:", originalWaveForm);
-      }
-
-      let newWaveform = toggleWave ? `${selectedShape} (${dcOff} ${amplitude} ${frequency}k)` : originalWaveForm;
-      existingContent = existingContent.replace(waveformRegex, newWaveform);
-      existingContent = existingContent.trim();
+  // Extract probe lines
+  lines.forEach(line => {
+    if (line.trim().startsWith('.probe')) {
+      // Extract the probe target and add to probeLines array
+      const probeContent = line.trim().replace(".probe", "").trim();
+      probeLines.push(probeContent);
     }
+  });
 
-    lines.forEach(line => {
-      if (line.trim().startsWith('.probe')) {
-        // Extract the probe target and add to probeLines array
-        const probeContent = line.trim().replace(".probe", "").trim();
-        probeLines.push(probeContent);
-      }
-    });
-
-    let vProbes = [];
-    let iProbes = [];
-    let printString = "";
+  let vProbes = [];
+  let iProbes = [];
+  let printString = "";
 
 // Separate voltage (V) and current (I) probes
     probeLines.forEach(probe => {
@@ -357,72 +500,35 @@ async function ModifyNetlist(filePath) {
     }
   });
 
-
-// Pair up voltage probes and format as vdb pairs
-switch (plotType) {
-  case 'ACSweep':
-    for (let i = 0; i < vProbes.length; i += 2) {
-      if (vProbes[i] == 0) {
-        printString += `print vdb(${vProbes[i + 1]})\n`;
-      } else if (vProbes[i + 1] == 0) {
-        printString += `print vdb(${vProbes[i]})\n`;
-      } else if (vProbes[i] != 0 && vProbes[i + 1] != 0) {
-        printString += `print vdb(${vProbes[i]},${vProbes[i + 1]})\n`;
-      }
-    }    
-    break;
-  case 'DCSweep':
-    for (let i = 0; i < vProbes.length; i += 2) {
-      if (vProbes[i] == 0) {
-        printString += `print v(${vProbes[i + 1]})\n`;
-      } else if (vProbes[i + 1] == 0) {
-        printString += `print v(${vProbes[i]})\n`;
-      } else if (vProbes[i] != 0 && vProbes[i + 1] != 0) {
-        printString += `print v(${vProbes[i]},${vProbes[i + 1]})\n`;
-      }
-    }
-    console.log("DC SWEEP.");
-    break;
-  case 'Transient':
-    for (let i = 0; i < vProbes.length; i += 2) {
-      if (vProbes[i] == 0) {
-        printString += `print v(${vProbes[i + 1]})\n`;
-      } else if (vProbes[i + 1] == 0) {
-        printString += `print v(${vProbes[i]})\n`;
-      } else if (vProbes[i] != 0 && vProbes[i + 1] != 0) {
-        printString += `print v(${vProbes[i]},${vProbes[i + 1]})\n`;
-      }
-    } 
-    console.log("Transient, add volt probes as v() or vr()");
-    break;
-  case 'DC OP':
-    console.log("DC OP");
-    break;
-}
+printString = makePrintLines(vProbes, iProbes, controlSwitch);
 
 // Add current probes as individual .print lines
-if (!controlSection.includes('ac')) {
-  iProbes.forEach(probe => {
-    printString += `print ${probe}\n`;
-  });
-  console.log("No AC sweep. Adding current probes as individual .print lines.");
-}
 
-    existingContent = existingContent.replace(/^\s*\.probe.*$/gm, '');
-    controlSection += printString + "\n";
-    let finalContent = removeAndReplaceControlSection(existingContent, controlSection);
-    console.log("Final Content:", finalContent);
-    finalContent = finalContent.trim();
+// Remove existing .probe lines
+existingContent = existingContent.replace(/^\s*\.probe.*$/gm, '');
 
-    // Change the file extension to .cir
-    const newFilePath = filePath.replace(/\.[^/.]+$/, ".cir");
+//append print lines to control section
+controlSection += printString + "\n";
 
-    // Write the modified content back to the new file
-    await writeFile(newFilePath, finalContent);
-    return newFilePath;
-  } catch (error) {
-    console.error('Error modifying netlist:', error);
-  }
+controlSection += '\n.endc\n';
+let finalContent = existingContent + controlSection;
+
+finalContent += '\n.end\n';
+
+finalContent = finalContent.trim();
+
+console.log(finalContent);
+
+
+// Change the file extension to .cir
+const newFilePath = filePath.replace(/\.[^/.]+$/, ".cir");
+
+// Write the modified content back to the new file
+await writeFile(newFilePath, finalContent);
+return newFilePath;
+} catch (error) {
+  console.error('Error modifying netlist:', error);
+}   
 }
 
 function showWaveform() {
@@ -599,48 +705,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Netlist file does not exist, skipping initialization.');
   }
 
-  document.getElementById('viewData').addEventListener('click', async () => {
-    if (rawOutput !== null) {
-      const tableBody = document.querySelector('#dataTable tbody');
-      tableBody.innerHTML = ''; // Clear any existing rows
-
-      // Parse the rawOutput
-      const lines = rawOutput.split('\n'); // Split by lines
-      const dataStartIndex = lines.findIndex(line => line.startsWith('Index')); // Locate data start
-      const dataLines = lines.slice(dataStartIndex + 2, dataStartIndex + 52); // Extract the first 50 rows
-
-      // Populate the table
-      dataLines.forEach(line => {
-        const columns = line.trim().split(/\s+/); // Split by whitespace
-        if (columns.length === 3) {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-                    <td>${columns[0]}</td>
-                    <td>${columns[1]}</td>
-                    <td>${columns[2]}</td>
-                `;
-          tableBody.appendChild(row);
-        }
-      });
-
-      // Open the modal
-      openModal();
-    } else {
-      console.error('No raw output data available');
-    }
-  });
-
-  // Function to open the modal
-  function openModal() {
-    document.getElementById('dataModal').style.display = 'block';
-  }
-
-  document.querySelector('.close-button').addEventListener('click', closeModal);
-
-  // Function to close the modal
-  function closeModal() {
-    document.getElementById('dataModal').style.display = 'none';
-  }
+  document.getElementById('viewData').addEventListener('click', saveOutput);
 
   document.getElementById('loadButton').addEventListener('click', async () => {
 
@@ -696,6 +761,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           let cleanedOutput = '';
           const output = await window.electron.simulateCircuit(filePath);
           let rawOutput = output
+          RawData = rawOutput;
           console.log(rawOutput);
           switch (plotType) {
             case 'Transient':
@@ -755,6 +821,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           let cleanedOutput = '';
           const output = await window.electron.simulateCircuit(filePath);
           let rawOutput = output
+          RawData = rawOutput;
           switch (plotType) {
             case 'Transient':
               cleanedOutput = parseTransData(rawOutput);
@@ -867,6 +934,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     })
     
 });
+
+async function saveOutput(SaveBtn) {
+  try {
+    let outputToFile = RawData;
+    if(SaveBtn) {
+      const response = await window.electron.SaveRawOutput(outputToFile);
+      if (response && response.message) {
+        alert(response.message);
+      }
+    }
+  } catch (error) {
+    console.error("Error saving circuit:", error);
+    alert("An error occurred while saving the circuit.");
+  }
+
+}
 
 
 function restoreGraph() {
@@ -1292,18 +1375,181 @@ function generateTable(data) {
     return tableHtml;
 }
 
-function GenerateACSweepTable(data) {
+function GenerateACSweepTable(parsedData) {
+  const tableWindow = window.open("", "_blank", "width=600,height=400");
+  
+  if (!tableWindow) {
+      console.error("Popup blocked! Allow popups for this site.");
+      return;
+  }
+
+  tableWindow.document.write(`
+      <html>
+      <head>
+          <title>AC Sweep Data</title>
+          <style>
+              body { font-family: Arial, sans-serif; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid black; padding: 8px; text-align: center; }
+              th { background-color: #f2f2f2; }
+          </style>
+      </head>
+      <body>
+          <h2>AC Sweep Data</h2>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Dataset</th>
+                      <th>Frequency (Hz)</th>
+                      <th>Magnitude (dB)</th>
+                  </tr>
+              </thead>
+              <tbody id="data-table-body">
+              </tbody>
+          </table>
+      </body>
+      </html>
+  `);
+
+  const tableBody = tableWindow.document.getElementById("data-table-body");
+
+  parsedData.forEach((entry, index) => {
+      if (!entry.data || !entry.data.frequency || !entry.data.dB) {
+          console.warn(`Skipping dataset "${index}" due to missing data.`);
+          return;
+      }
+
+      entry.data.frequency.forEach((freq, i) => {
+          const row = tableWindow.document.createElement("tr");
+          row.innerHTML = `
+              <td>${entry.header}</td>
+              <td>${freq}</td>
+              <td>${entry.data.dB[i]}</td>
+          `;
+          tableBody.appendChild(row);
+      });
+  });
 }
 
-function GenerateDCSweepTable(data) {
+
+function GenerateDCSweepTable(cleanedOutput) {
+  const tableWindow = window.open("", "_blank", "width=600,height=400");
+  
+  if (!tableWindow) {
+      console.error("Popup blocked! Allow popups for this site.");
+      return;
+  }
+
+  tableWindow.document.write(`
+      <html>
+      <head>
+          <title>DC Sweep Data</title>
+          <style>
+              body { font-family: Arial, sans-serif; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid black; padding: 8px; text-align: center; }
+              th { background-color: #f2f2f2; }
+          </style>
+      </head>
+      <body>
+          <h2>DC Sweep Data</h2>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Dataset</th>
+                      <th>V-Sweep (V)</th>
+                      <th>Value</th>
+                  </tr>
+              </thead>
+              <tbody id="data-table-body">
+              </tbody>
+          </table>
+      </body>
+      </html>
+  `);
+
+  const tableBody = tableWindow.document.getElementById("data-table-body");
+
+  cleanedOutput.forEach((entry, index) => {
+      if (!entry.data || !entry.data['v-sweep'] || !entry.data.value) {
+          console.warn(`Skipping dataset "${index}" due to missing data.`);
+          return;
+      }
+
+      entry.data['v-sweep'].forEach((v, i) => {
+          const row = tableWindow.document.createElement("tr");
+          row.innerHTML = `
+              <td>${entry.header}</td>
+              <td>${v}</td>
+              <td>${entry.data.value[i]}</td>
+          `;
+          tableBody.appendChild(row);
+      });
+  });
 }
 
-function GenerateTransientTable(data) {
+function GenerateTransientTable(cleanedOutput) {
+  const tableWindow = window.open("", "_blank", "width=600,height=400");
+  
+  if (!tableWindow) {
+      console.error("Popup blocked! Allow popups for this site.");
+      return;
+  }
+
+  tableWindow.document.write(`
+      <html>
+      <head>
+          <title>Transient Data</title>
+          <style>
+              body { font-family: Arial, sans-serif; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid black; padding: 8px; text-align: center; }
+              th { background-color: #f2f2f2; }
+          </style>
+      </head>
+      <body>
+          <h2>Transient Data</h2>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Dataset</th>
+                      <th>Time (s)</th>
+                      <th>Value</th>
+                  </tr>
+              </thead>
+              <tbody id="data-table-body">
+              </tbody>
+          </table>
+      </body>
+      </html>
+  `);
+
+  const tableBody = tableWindow.document.getElementById("data-table-body");
+
+  cleanedOutput.forEach((entry, index) => {
+      if (!entry.data || !entry.data.time || !entry.data.value) {
+          console.warn(`Skipping dataset "${index}" due to missing data.`);
+          return;
+      }
+
+      entry.data.time.forEach((time, i) => {
+          const row = tableWindow.document.createElement("tr");
+          row.innerHTML = `
+              <td>${entry.header}</td>
+              <td>${time}</td>
+              <td>${entry.data.value[i]}</td>
+          `;
+          tableBody.appendChild(row);
+      });
+  });
 }
 
+function printLineHandler(existContent) {
 
+}
 function removeAndReplaceControlSection(existingContent, controlSection) {
-  // Regex to find print lines (e.g., print vdb(1,2) or print all)
+  // Regex to find print lines (e.g., print vdb(1,2), print v(3,4) or print all)
+  nodeValMap.clear();
   const printRegex = /^\s*print.*$/gm;
   const printLines = [];
   let match;
@@ -1312,19 +1558,29 @@ function removeAndReplaceControlSection(existingContent, controlSection) {
   while ((match = printRegex.exec(existingContent)) !== null) {
       printLines.push(match[0]);
   }
+  //for each printline
+  //store the node at the end of print v/vdb(node)
+  //remove the print line
+  printLines.forEach(line => {
+    if (line.startsWith('print v')) {
+      let nodeVal = line.split('(')[1].split(')')[0];
+      nodeValMap.set(nodeVal);
+    }
+  })
 
   // Remove the print lines from the existing content
   existingContent = existingContent.replace(printRegex, '');
 
-  // Add the print lines to the control section
-  //if print line exsists in control section, skip
-
-  printLines.forEach(line => {
-      if (controlSection.includes(line)) {
-        return;
-      }
-      controlSection += `${line}\n`;
-  });
+  switch (plotType) {
+    case 'ACSweep':
+      break;
+    case 'DCSweep':
+      break;
+    case 'Transient':
+      break;
+    case 'DCOP':
+      break;
+  }
 
   // Add .endc to the control section
   controlSection += `.endc`;

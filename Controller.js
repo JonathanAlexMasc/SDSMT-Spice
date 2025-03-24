@@ -704,14 +704,14 @@ async function saveCircuit(SaveButton) {
         }
         }
         else{
-            console.log(circuitData)
+            //console.log(circuitData)
             const response = await window.electron.savetempFile(circuitData);
             if (response && response.message) {
                 alert(response.message);
             }
         }
 
-        console.log("map:", circuitData);
+        //console.log("map:", circuitData);
         
         console.log("Circuit saved successfully.");
     } catch (error) {
