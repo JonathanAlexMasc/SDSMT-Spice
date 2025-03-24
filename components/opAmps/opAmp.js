@@ -169,7 +169,7 @@ class OPAMP extends Entities {
     attachRight(con, numCons, i) {
         if (numCons == 2) {
             if (i == 0) {
-                con.style.top = "25%";
+                con.style.top = "30%";
             }
             else {
                 con.style.top = "75%";
@@ -204,7 +204,7 @@ class OPAMP extends Entities {
     attachTop(con, numCons, i) {
         if (numCons == 2) {
             if (i == 0) {
-                con.style.left = "25%";
+                con.style.left = "30%";
             } else {
                 con.style.left = "75%";
             }
@@ -220,7 +220,7 @@ class OPAMP extends Entities {
     attachBot(con, numCons, i) {
         if (numCons == 2) {
             if (i == 0) {
-                con.style.left = "25%";
+                con.style.left = "30%";
             } else {
                 con.style.left = "75%";
             }
@@ -331,6 +331,11 @@ class OPAMP extends Entities {
         } else {
             console.log("No match found for OpAmp model string");
         }
+    }
+
+    setSubckt() {
+        // Update the subcircuit definition with the correct model name
+        this.subckt = `.SUBCKT ${this.shortModelName} in_pos in_neg out PARAMS: AVOL=${this.AVOL} BW=${this.BW} RI=${this.RI} RO=${this.RO} VOS=${this.VOS} IBS=${this.IBS} IOS=${this.IOS} VOMP=${this.VOMP} VOMN=${this.VOMN}`;
     }
 
     static resetID() {

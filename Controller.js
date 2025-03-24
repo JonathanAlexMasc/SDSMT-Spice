@@ -673,7 +673,8 @@ async function saveCircuit(SaveButton) {
                 intX: instance.intX,
                 intY: instance.intY,
                 info: instance.info,
-                model: instance.model ? instance.model : null,
+              model: instance.model ? instance.model : null,
+                subckt: instance.subckt ? instance.subckt : null,
                 equation: instance.equation,
                 numInCons: instance.numInCons,
                 numOutCons: instance.numOutCons,
@@ -758,7 +759,7 @@ function loadCircuit(savedDataString) {
             }
 
             // Dynamically create the appropriate component instance
-            const { name, imgSrc, x, y, numInCons, numOutCons, info, model, equation, blockedNodes, rotation } = instance;
+            const { name, imgSrc, x, y, numInCons, numOutCons, info, model, subckt, equation, blockedNodes, rotation } = instance;
 
             const componentClass = getComponentClass(name); // Dynamically resolve the class based on the name
             if (!componentClass) {
@@ -780,7 +781,12 @@ function loadCircuit(savedDataString) {
 
             // If we have a model, restore it
             if (componentInstance.model) {
-                componentInstance.setModel(model)
+              componentInstance.setModel(model)
+            }
+          
+            // If we have a subckt, restore it
+            if (componentInstance.subckt) {
+              componentInstance.setSubckt(subckt)
             }
 
             // Build the component
@@ -909,6 +915,9 @@ function getComponentClass(name) {
     if (name.includes("PJFET")) return PJFET;
     if (name.includes("NMOS")) return NMOS;
     if (name.includes("PMOS")) return PMOS;
+  
+    // OpAMP
+    if (name.includes("xU")) return OPAMP;
 
     return null;
 }
@@ -969,6 +978,7 @@ function clearCircuit() {
     window.Zener.resetID();
     window.LED.resetID();
     window.Thyristor.resetID();
+   window.OPAMP.resetID();
     Connector.resetID();
     wireClass.resetID()
     groupCounter = 1;
