@@ -975,10 +975,16 @@ function clearCircuit() {
     window.Gnd.resetID();
     window.Diode.resetID();
     window.Capacitor.resetID();
+    window.NPN.resetID();
+    window.PNP.resetID();
+    window.NJFET.resetID();
+    window.PJFET.resetID();
+    window.NMOS.resetID();
+    window.PMOS.resetID();
     window.Zener.resetID();
     window.LED.resetID();
     window.Thyristor.resetID();
-   window.OPAMP.resetID();
+    window.OPAMP.resetID();
     Connector.resetID();
     wireClass.resetID()
     groupCounter = 1;
