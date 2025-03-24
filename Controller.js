@@ -24,6 +24,13 @@ const circuitData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  const resetZoomBtn = document.getElementById("reset-zoom-btn");
+             if (resetZoomBtn) {
+                 resetZoomBtn.click(); // Simulate a click when the page loads
+             } else {
+                 console.error("reset-zoom-btn not found!");
+             }
     document.getElementById('loadButton').addEventListener('click', async () => {
         const { filePath, fileContent } = await window.electron.openFileDialog();
         if (filePath) {
@@ -1071,11 +1078,10 @@ function addmodels() {
     
 }
 
-
 function generateGrid() {
     //const grid = document.getElementById('grid');
-    for (let i = 220; i < 1500; i += 10) {
-        for (let j = 90; j < 1500; j += 10) {
+    for (let i = 0; i < 1230; i += 10) {
+        for (let j = 10; j < 1050; j += 10) {
             // Store the point (i, j) in internalGrid
             internalGrid.push([i, j]);
         }
@@ -1129,7 +1135,6 @@ function updatePosProbe(posProbe) {
     console.log("PosProbe Name:", posProbe.name);
     let equationString = extractComponentAndNode(posProbe.name);
     console.log(equationString);
-
 
     // Format the equation
     //console.log("PosProbe Equation:", probe);

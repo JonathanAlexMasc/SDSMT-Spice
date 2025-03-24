@@ -152,7 +152,6 @@
                 </div>
                 <div class="grid-lines" id="grid">
                     <svg id="grid-svg" width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 0;">
-                        <!-- Wire paths will go here -->
                     </svg>
                 </div>
             </div>
@@ -168,7 +167,7 @@
             if (sessionStorage.getItem("loadCircuit") === "true") {
                 sessionStorage.removeItem("loadCircuit"); // Clear flag
                 console.log("Triggering loadtempFile...");
-                await loadtempFile(); // Make sure this function exists
+                await loadtempFile(); 
             }
         });
     </script>
