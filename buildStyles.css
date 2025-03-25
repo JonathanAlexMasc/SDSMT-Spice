@@ -2,9 +2,9 @@
 :root {
     --tile-size: 10px;           /* Size of each grid tile */
     --grid-thickness: 1px;       /* Thickness of grid lines */
-    --max-tiles: 70;             /* Maximum number of tiles in a row */
-    --max-rows: 70;              /* Maximum number of rows */
-    --max-columns: 70;           /* Maximum number of columns */
+    --max-tiles: 100;             /* Maximum number of tiles in a row */
+    --max-rows: 100;              /* Maximum number of rows */
+    --max-columns: 100;           /* Maximum number of columns */
 }
 
 /* General body and layout styling */
