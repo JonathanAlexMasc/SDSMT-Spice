@@ -4,6 +4,7 @@ const componentMap = new Map();
 const probeMap = new Map();
 let componentIdCounter = 0;
 let componentPositions = {};
+let ProbeCounter = 1;
 let groupCounter = 1;
 let internalGrid = [];
 let isDrawingWire = false;
@@ -17,6 +18,7 @@ let currNegProbe = null;
 let groundWire = false;
 const groupMap = new Map();
 const connectionMap = new Map();
+
 
 const circuitData = {
     components: [],
@@ -72,11 +74,27 @@ function endDrawingWire(connectionId) {
     
 }
 
-// createGroup is called when a new connection is made.
+function updateProbeEquations() {
+    probeMap.forEach((probe, probeName) => {
+      let groupSearcher = probe.conID;
+      //console.log("Group Searcher:", groupSearcher);
+      if (groupMap.has(groupSearcher)) {
+        let sharedValue = groupMap.get(groupSearcher);
+        probe.nodeVal = sharedValue.value;
+        probe.equation = `.probe V(${probe.nodeVal})`;
+        //console.log("Probe Equation:", probe.equation);
+      }
+      //console.log(probe.equation);
+    });
+}
+
 // createGroup is called when a new connection is made.
 function createGroup(startConnection, endConnection) {
     let sharedValue;
     let connections = [startConnection, endConnection];
+
+    console.log('Start Connection:', startConnection);
+    console.log('End Connection:', endConnection);
   
     // Check if either connection is "Ground"
     const isGrounded = startConnection.startsWith("Ground") || endConnection.startsWith("Ground");
@@ -92,17 +110,23 @@ function createGroup(startConnection, endConnection) {
       sharedValue = { value: groupCounter };
       groupCounter++;
     }
+
+    
   
     // Save the shared reference in both groupMap and connectionMap.
     groupMap.set(startConnection, sharedValue);
     groupMap.set(endConnection, sharedValue);
     connectionMap.set(connections, sharedValue);
+    console.log("Group Map", groupMap);
+
+    updateProbeEquations();
   
     // If grounding occurs, update connections and groups.
     if (isGrounded) {
       updateConnectionsForGround(connectionMap);
       updateGroupMapFromConnections(connectionMap, groupMap);
     }
+    console.log("ProbeMap", probeMap);
 
     console.log(`Group created between ${startConnection} and ${endConnection}, shared value: ${sharedValue.value}`);
   }
@@ -1089,13 +1113,18 @@ function generateGrid() {
 }
 
 function placePosProbe(ConnectionID, connector) {
-    //console.log(ConnectionID);
-    return new VoltProbe(ConnectionID, connector, NegativeProbe);
+  
+  NegativeProbe = true;
+  //console.log(ConnectionID);
+  return new VoltProbe(ConnectionID, connector, NegativeProbe);
 }
 
 function placeNegProbe(ConnectionID, connector) {
-    //console.log(ConnectionID);
-    return new VoltProbe(ConnectionID, connector, NegativeProbe);
+  NegativeProbe = false;
+  ProbeOn = false;
+  wireBlocker = false;
+  //console.log(ConnectionID);
+  return new VoltProbe(ConnectionID, connector, NegativeProbe);
 }
 
 function placeCurrentProbe(ConnectionID, connector) {
@@ -1104,9 +1133,11 @@ function placeCurrentProbe(ConnectionID, connector) {
 }
 
 function extractComponentAndNode(probeName) {
+  console.log("Probe Name:", probeName);
     let ProbeString = '';
     const parts = probeName.split('-');
-    console.log("Probe Name:", probeName);
+    console.log("Parts:", parts);
+    
     
     // Ensure we have at least three parts (component, connector, node)
     if (parts.length >= 3) {
@@ -1115,6 +1146,12 @@ function extractComponentAndNode(probeName) {
 
         let groupKey = `${componentId}-${connectorID}`;
         console.log("Group Key:", groupKey);
+
+        if (!groupMap.has(groupKey)) {
+          // There is not a connection stored in this map
+          ProbeString = '.probe V()';
+          return ProbeString;
+        }
 
         const sharedVal = groupMap.get(groupKey);
         console.log("Shared Value:", sharedVal.value);

@@ -179,16 +179,12 @@ class Entities {
                 }
                 if (NegativeProbe) {
                     currNegProbe = placeNegProbe(conID, con);
-                    updatePosProbe(currPosProbe);
-                    updateNegProbe(currNegProbe);
-                    NegativeProbe = false;
-                    ProbeOn = false;
-                    wireBlocker = false;
+                    //updatePosProbe(currPosProbe);
+                    //updateNegProbe(currNegProbe);
                 }
                 else {
                     //place positive probe
                     currPosProbe = placePosProbe(conID, con);
-                    NegativeProbe = true;
                 }
             }
         })

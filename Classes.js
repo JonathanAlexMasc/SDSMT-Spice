@@ -168,7 +168,7 @@ class CurrentProbe extends Probe {
         this.ConButton = con;
         this.ConID = con.id;
         console.log(this.ConID);
-        this.equation = `.probe I(${this.extractComponentName(conID)})`;
+        this.equation = `.probe i(${this.extractComponentName(conID)})`;
         this.CurrentProbeImg = "images/Probe/Current Probe.svg";
         this.buildProbe();
         probeMap.set(this.name, this);
