@@ -236,7 +236,7 @@ class OPAMP extends Entities {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `opAmpModal${OpAmp.OpAmpID}`;
+        modal.id = `opAmpModal${OPAMP.OpAmpID}`;
         modal.tabIndex = -1;
 
         modal.innerHTML = `
