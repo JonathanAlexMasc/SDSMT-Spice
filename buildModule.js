@@ -15,6 +15,7 @@ import { AddNMOS } from "./components/transistors/MOSFETS/nmos.js";
 import { AddPMOS } from "./components/transistors/MOSFETS/pmos.js";
 import { AddNJFET } from "./components/transistors/JFETS/njfet.js";
 import { AddPJFET } from "./components/transistors/JFETS/pjfet.js";
+import { AddOpAmp } from "./components/opAmps/opAmp.js";
 
 // Listeners
 
@@ -81,6 +82,11 @@ document.getElementById('volt_btn').addEventListener('click', function () {
 
 document.getElementById('dcVolt_btn').addEventListener('click', function () {
     AddDCVoltage();
+});
+
+document.getElementById('opAmp_btn').addEventListener('click', function () {
+    console.log('in click')
+    AddOpAmp();
 });
 
 // Get all menu items

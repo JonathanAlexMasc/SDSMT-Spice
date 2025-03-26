@@ -156,6 +156,9 @@ function fabListener(button, rotateButton, deleteButton, clearWiresButton, editB
     console.log("Component Map")
     console.log(componentMap)
 
+    console.log("Component Data")
+    console.log(componentData)
+
     if (rotateButton) {
         rotateButton.addEventListener('click', () => {
             // Update the rotation angle
@@ -165,7 +168,7 @@ function fabListener(button, rotateButton, deleteButton, clearWiresButton, editB
             button.style.transform = `rotate(${currentRotation}deg)`;
     
             // Update connector positions based on new rotation
-            updateConnectors(componentData.connectors);
+            updateConnectors(componentData);
             updateWires(componentId);
 
             console.log("Wires Updated");
@@ -317,86 +320,101 @@ function clearWiresFromComponent(componentId) {
     keysToDelete.forEach(key => {
       connectionMap.delete(key);
     });
+}
+
+function getConnectionsPerSide(connectors) {
+  let connections = { top: 0, bottom: 0, left: 0, right: 0 };
+
+  connectors.forEach(connector => {
+    if (connector.classList.contains("top-connector")) {
+      connections.top++;
+    } else if (connector.classList.contains("bot-connector")) {
+      connections.bottom++;
+    } else if (connector.classList.contains("left-connector")) {
+      connections.left++;
+    } else if (connector.classList.contains("right-connector")) {
+      connections.right++;
+    }
+  });
+
+  return connections;
+}
+
+function filterConnectorsBySide(connectors, side) {
+  return connectors.filter(connector => connector.classList.contains(`${side}-connector`));
+}
+
+function attachUpdatedConnectors(component, conectorsArr) {
+
+  const rightConnectors = filterConnectorsBySide(conectorsArr, "right");
+  const leftConnectors = filterConnectorsBySide(conectorsArr, "left");
+  const topConnectors = filterConnectorsBySide(conectorsArr, "top");
+  const bottomConnectors = filterConnectorsBySide(conectorsArr, "bot");
+
+  for (let i = 0; i < leftConnectors.length; i++) {
+    component.instance.attachLeft(leftConnectors[i], leftConnectors.length, i);
   }
-  
-  
-  
-function attachBot(con) {
-    con.style.bottom = "-7px"; // Adjust as needed to move it below the main button
-    con.style.left = "50%";
-    con.style.transform = "translateX(-45%)";
-    con.classList.add("bot-connector");
-}
-function attachTop(con) {
-    con.style.top = "-9px"; // Adjust as needed to move it above the main button
-    con.style.left = "50%";
-    con.style.transform = "translateX(-50%)";
-    con.classList.add("top-connector");
-}
 
-function attachRight( button2) {
-    button2.style.right = "-10px"; // Adjust as needed to move it to the right of the main button
-    button2.style.top = "50%";
-    button2.style.transform = "translateY(-50%)";
-    button2.classList.add("right-connector");
+  for (let i = 0; i < rightConnectors.length; i++) {
+    component.instance.attachRight(rightConnectors[i], rightConnectors.length, i);
+  }
+
+  for (let i = 0; i < topConnectors.length; i++) {
+    component.instance.attachTop(topConnectors[i], topConnectors.length, i);
+  }
+
+  for (let i = 0; i < bottomConnectors.length; i++) {
+    component.instance.attachBot(bottomConnectors[i], bottomConnectors.length, i);
+
+    console.log("Bottom Style: ", bottomConnectors[i].style)
+  }
 }
 
-function attachLeft(button) {
-    button.style.left = "-10px"; // Adjust as needed to move it to the left of the main button
-    button.style.top = "50%";
-    button.style.transform = "translateY(-50%)";
-    button.classList.add("left-connector");
-}
+function updateConnectors(component) {
+  let connectors = component.connectors;
+  console.log("Component: ", component);
+  console.log("Connectors Pre Rotation: ", connectors);
+  connectors.forEach(connector => {
+    // Store the current class and corresponding transformation
+    let newClass = '';
 
+    // Determine the new position and transformation based on the current class
+    if (connector.classList.contains('top-connector')) {
+        newClass = 'right-connector';
+    } else if (connector.classList.contains('bot-connector')) {
+        newClass = 'left-connector';
+    } else if (connector.classList.contains('left-connector')) {
+        newClass = 'top-connector';
+    } else if (connector.classList.contains('right-connector')) {
+        newClass = 'bot-connector';
+    }
 
-function updateConnectors(connectors) {
-    console.log("Connectors: ", connectors);
-    connectors.forEach(connector => {
-        // Store the current class and corresponding transformation
-        let newClass = '';
-        let transformFunction = null;
-        // Determine the new position and transformation based on the current class
-        if (connector.classList.contains('top-connector')) {
-            newClass = 'right-connector';
-            transformFunction = attachRight;
-        } else if (connector.classList.contains('bot-connector')) {
-            newClass = 'left-connector';
-            transformFunction = attachLeft;
-        } else if (connector.classList.contains('left-connector')) {
-            newClass = 'top-connector';
-            transformFunction = attachTop;
-        } else if (connector.classList.contains('right-connector')) {
-            newClass = 'bot-connector';
-            transformFunction = attachBot;
-        }
+    // Remove previous positions and transformations
+    connector.style.top = '';
+    connector.style.bottom = '';
+    connector.style.left = '';
+    connector.style.right = '';
+    connector.style.transform = '';
 
-        // Remove previous positions and transformations
-        connector.style.top = '';
-        connector.style.bottom = '';
-        connector.style.left = '';
-        connector.style.right = '';
-        connector.style.transform = '';
+    // Define a regex pattern to match classes of the form 'dir-connector'
+    const pattern = /^.*-connector$/;
 
-        // Apply the transformation and update the class
-        if (transformFunction) {
-            transformFunction(connector);
-        
-            // Define a regex pattern to match classes of the form 'dir-connector'
-            const pattern = /^.*-connector$/;
-        
-            // Remove the class matching the pattern
-            connector.classList.forEach(cls => {
-                if (pattern.test(cls)) {
-                    connector.classList.remove(cls);
-                }
-            });
-        
-            // Add the new class
-            connector.classList.add(newClass);
-        }
-
-        console.log(`componentMap in updateConnectors: ${componentMap}`);
+    // Remove the class matching the pattern
+    connector.classList.forEach(cls => {
+      if (pattern.test(cls)) {
+        connector.classList.remove(cls);
+      }
     });
+
+    // Add the new class
+    connector.classList.add(newClass);
+
+    console.log(`componentMap in updateConnectors: ${componentMap}`);
+  });
+
+  console.log("Connectors Post Rotation: ", connectors);
+
+  attachUpdatedConnectors(component, connectors);
 }
 
 function AddVoltageProbe() {
@@ -552,6 +570,9 @@ function generateNetlist() {
 
     // Diode Models
     const models = []
+  
+    // OpAmps
+    const subckts = []
 
     // Loop through each component in the componentMap
     componentMap.forEach((componentData, componentId) => {
@@ -567,13 +588,24 @@ function generateNetlist() {
                 netlist += " " + componentInstance.equation + ' ' + componentInstance.info + '\n';
             }
             else {
-                // Otherwise, add it to the array of non-Voltage components
-                nonVoltageComponents.push(componentInstance.equation);
+              // Otherwise, add it to the array of non-Voltage components
+              nonVoltageComponents.push(componentInstance.equation);
             }
 
             // push models 
             if (componentInstance.hasModel) {
-                models.push(componentInstance.model)
+              models.push(componentInstance.model)
+            }
+          
+            if (componentInstance.hasSubckt) {
+              // only handling opAmps for now
+              let opAmpInfo = {};
+              opAmpInfo.subckt = componentInstance.subckt;
+              opAmpInfo.inStage = componentInstance.inStage;
+              opAmpInfo.midStage = componentInstance.midStage;
+              opAmpInfo.outStage = componentInstance.outStage;
+
+              subckts.push(opAmpInfo);
             }
         }
     });
@@ -586,6 +618,13 @@ function generateNetlist() {
     models.forEach(model => {
         netlist += model + '\n';
     })
+  
+    subckts.forEach(op => {
+      netlist += '\n' + op.subckt + '\n';
+      netlist += '\n' + op.inStage + '\n';
+      netlist += '\n' + op.midStage + '\n';
+      netlist += '\n' + op.outStage + '\n';
+      })
 
     // Now cycle through ProbeMap and grab all probe equations
     probeMap.forEach((probeInstance, probeName) => {
@@ -641,7 +680,8 @@ async function saveCircuit(SaveButton) {
                 intX: instance.intX,
                 intY: instance.intY,
                 info: instance.info,
-                model: instance.model ? instance.model : null,
+              model: instance.model ? instance.model : null,
+                subckt: instance.subckt ? instance.subckt : null,
                 equation: instance.equation,
                 numInCons: instance.numInCons,
                 numOutCons: instance.numOutCons,
@@ -726,7 +766,7 @@ function loadCircuit(savedDataString) {
             }
 
             // Dynamically create the appropriate component instance
-            const { name, imgSrc, x, y, numInCons, numOutCons, info, model, equation, blockedNodes, rotation } = instance;
+            const { name, imgSrc, x, y, numInCons, numOutCons, info, model, subckt, equation, blockedNodes, rotation } = instance;
 
             const componentClass = getComponentClass(name); // Dynamically resolve the class based on the name
             if (!componentClass) {
@@ -748,7 +788,12 @@ function loadCircuit(savedDataString) {
 
             // If we have a model, restore it
             if (componentInstance.model) {
-                componentInstance.setModel(model)
+              componentInstance.setModel(model)
+            }
+          
+            // If we have a subckt, restore it
+            if (componentInstance.subckt) {
+              componentInstance.setSubckt(subckt)
             }
 
             // Build the component
@@ -877,6 +922,9 @@ function getComponentClass(name) {
     if (name.includes("PJFET")) return PJFET;
     if (name.includes("NMOS")) return NMOS;
     if (name.includes("PMOS")) return PMOS;
+  
+    // OpAMP
+    if (name.includes("xU")) return OPAMP;
 
     return null;
 }
@@ -934,9 +982,16 @@ function clearCircuit() {
     window.Gnd.resetID();
     window.Diode.resetID();
     window.Capacitor.resetID();
+    window.NPN.resetID();
+    window.PNP.resetID();
+    window.NJFET.resetID();
+    window.PJFET.resetID();
+    window.NMOS.resetID();
+    window.PMOS.resetID();
     window.Zener.resetID();
     window.LED.resetID();
     window.Thyristor.resetID();
+    window.OPAMP.resetID();
     Connector.resetID();
     wireClass.resetID()
     groupCounter = 1;
