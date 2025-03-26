@@ -213,7 +213,7 @@ function LinkAmplitude(slider, input) {
 
 function EditCircuit() {
   sessionStorage.setItem("loadCircuit", "true");
-  window.location.href = "build.html";
+  window.location.href = "Build.html";
 }
 
 function linkFrequency(slider, input) {
