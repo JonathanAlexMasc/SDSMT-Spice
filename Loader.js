@@ -1,5 +1,3 @@
-if (require('electron-squirrel-startup') === true) app.quit();
-
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -39,6 +37,8 @@ function loadRunPage() {
 }
 
 app.whenReady().then(() => {
+  if (require('electron-squirrel-startup') === true) app.quit();
+
   createWindow();
 
   app.on('activate', () => {
