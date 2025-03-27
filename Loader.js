@@ -1,10 +1,15 @@
+const log = require('electron-log');
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { exec } = require('child_process');
 const { updateElectronApp } = require('update-electron-app')
-updateElectronApp();
+log.transports.file.resolvePath = () => path.join(os.homedir(), 'electron-app.log');
+updateElectronApp({
+  logger: log
+});
+log.info('Checking for app updates...');
 
 let win;
 
