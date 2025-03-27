@@ -18,7 +18,7 @@ class wireClass {
         this.wireName = ++wireClass.wireID;
         this.nodeA = nodeA;
         this.nodeB = nodeB;
-        //console.log("WireName: " + this.wireName);
+        ////console.log("WireName: " + this.wireName);
     } 
 
     static resetID() {
@@ -122,13 +122,14 @@ class VoltProbe extends Probe {
         super();
         this.conID = conID;
         this.name = conID + "-VoltProbe" + ++VoltProbe.voltProbeID;
-        //console.log(this.name);
+        this.Type = "VoltProbe";
+        ////console.log(this.name);
         this.ConButton = con;
         this.ConID = con.id;
-        console.log(this.ConID);
+        ////console.log(this.ConID);
         this.TypeVal = PosOrNeg;
         this.equation = '';
-        //console.log('Probe Equation:', this.equation);
+        ////console.log('Probe Equation:', this.equation);
         this.posProbeImg = "images/Probe/VoltProbeAlt.svg";
         this.negProbeImg = "images/Probe/VoltProbeAlt-.svg";
         this.buildProbe();
@@ -167,7 +168,7 @@ class CurrentProbe extends Probe {
         this.name = conID +"-CurrentProbe" + ++CurrentProbe.currentProbeID;
         this.ConButton = con;
         this.ConID = con.id;
-        console.log(this.ConID);
+        //console.log(this.ConID);
         this.equation = `.probe I(${this.extractComponentName(conID)})`;
         this.CurrentProbeImg = "images/Probe/Current Probe.svg";
         this.buildProbe();
