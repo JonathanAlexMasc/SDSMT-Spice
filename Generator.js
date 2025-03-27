@@ -326,7 +326,7 @@ function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
     });
 
     nodeValCurrMap.forEach((_, nodeVal) => {  // We don't need the value, just the key (nodeVal)
-      printLines += `print i(${nodeVal})\n`;
+      printLines += `print I(${nodeVal})\n`;
     });
     return printLines;
   }
@@ -342,16 +342,6 @@ function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
           } else if (voltProbes[i] != 0 && voltProbes[i + 1] != 0) {
             printLines += `print vdb(${voltProbes[i]})\n`;
             printLines += `print vdb(${voltProbes[i + 1]})\n`;
-          }
-        }
-        //current probes
-        for (let i = 0; i < currentProbes.length; i += 2) {
-          if (currentProbes[i] == 0) {
-            //cant be 0
-            console.log("Current probe is 0, do not add");
-          }
-          else {
-            printLines += `print i(${currentProbes[i]})\n`;
           }
         }
         break;
@@ -385,6 +375,17 @@ function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
         printLines += `print all\n`;
         //console.log("DC OP");
         break;
+    }
+    //current probes
+    for (let i = 0; i < currentProbes.length; i += 2) {
+      if (currentProbes[i] == 0) {
+        //cant be 0
+        console.log("Current probe is 0, do not add");
+        continue;
+      }
+      else {
+        printLines += `print I(${currentProbes[i]})\n`;
+      }
     }
     return printLines;
   }
@@ -426,8 +427,9 @@ async function ModifyNetlist(filePath) {
       });
 
       printLines.forEach(line => {
-        if (line.startsWith('print i')) {
+        if (line.startsWith('print I')) {
           let nodeVal = line.split('(')[1].split(')')[0];
+          console.log("Node val: " + nodeVal);
           nodeValCurrMap.set(nodeVal, line);
         }
       })
@@ -499,6 +501,9 @@ async function ModifyNetlist(filePath) {
       iProbes.push(probe);
     }
   });
+
+  console.log("Voltage Probes:", vProbes);
+  console.log("Current Probes:", iProbes);
 
 printString = makePrintLines(vProbes, iProbes, controlSwitch);
 
@@ -972,7 +977,7 @@ function restoreGraph() {
 
 
 function parseTransData(output) {
-  console.log(output);
+  //console.log(output);
   const lines = output.split('\n');
   let parseData = false;
   let headers = []; // Store column labels
@@ -1010,10 +1015,12 @@ function parseTransData(output) {
       // Parse numerical data
       const parts = line.split(/\s+/).filter(part => part !== ''); 
 
-      if (parts.length === 3) { // Ensure sufficient data in the line
+      if (parts.length == 3 || parts.length == 4) { // Ensure sufficient data in the line
           const index = parseInt(parts[0], 10); // First column is index
           const time = parseFloat(parts[1]); // Second column is time
           const value = parseFloat(parts[2]); // Third column is value
+          //4th col is imaginary, dont need it but may save it
+          const imaginary = parseFloat(parts[3]);
 
           if (!isNaN(index) && !isNaN(time) && !isNaN(value)) {
               if (index === 0 && infoStorage.time.length > 0) {
@@ -1060,7 +1067,6 @@ function parseTransData(output) {
 
 
 function parseDCData(output) {
-  console.log(output);
   const lines = output.split('\n');
   let parseData = false;
   let headers = []; // Store column labels
@@ -1086,18 +1092,24 @@ function parseDCData(output) {
 
       // Detect header row (line with "Index" and signal names)
       if (line.startsWith("Index")) {
-          const newHeaders = line.split(/\s+/).slice(1); // Exclude "Index"
-          headers = newHeaders;
+          const newHeaders = line.split(/\s+/).slice(1).filter(header => header.toLowerCase() !== 'index'); // Exclude "Index"
+          newHeaders.forEach(header => {
+              if (!headers.includes(header)) {
+                  headers.push(header);
+              }
+          });
           continue;
       }
 
       // Parse numerical data
       const parts = line.split(/\s+/).filter(part => part !== ''); 
 
-      if (parts.length === headers.length + 1) { // Ensure it matches column count
+      if (parts.length == 3 || parts.length == 4) { // At least Index, V-Sweep, and Value (4th column can be ignored)
           const index = parseInt(parts[0], 10); // First column is index
           const vSweep = parseFloat(parts[1]); // Second column is sweep voltage
           const value = parseFloat(parts[2]); // Third column is value
+          // Fourth column is imaginary (optional, ignored)
+          const imaginary = parts.length > 3 ? parseFloat(parts[3]) : null; 
 
           if (!isNaN(index) && !isNaN(vSweep) && !isNaN(value)) {
               if (index === 0 && infoStorage['v-sweep'].length > 0) {
@@ -1141,6 +1153,7 @@ function parseDCData(output) {
   return dataStore;
 }
 
+
 function parseDCOPData(output) {
     const lines = output.split("\n");
     const data = [];
@@ -1173,6 +1186,12 @@ function parseACSweepData(output) {
         'frequency': [],
         'dB': []
     }; // Store data dynamically
+    let iStorage = {
+        'frequency': [],
+        'Value': [],
+        'Phase': []
+    };
+
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -1191,6 +1210,7 @@ function parseACSweepData(output) {
         // Detect header row (line with "Index" and signal names)
         if (line.startsWith("Index")) {
             const newHeaders = line.split(/\s+/).slice(1).filter(header => header.toLowerCase() !== 'frequency');
+            console.log(newHeaders);
             newHeaders.forEach(header => {
                 if (!headers.includes(header)) {
                     headers.push(header);
@@ -1202,15 +1222,17 @@ function parseACSweepData(output) {
         // Parse numerical data
         const parts = line.split(/\s+/).filter(part => part !== ''); 
 
-        if (parts.length === 3) {  // Ensure sufficient data in the line
+        if (parts.length == 3 || parts.length == 4) {  // Ensure sufficient data in the line
             const index = parseInt(parts[0], 10); // First column is index
             const frequency = parseFloat(parts[1]);
             const value = parseFloat(parts[2]);
+            const imaginary = parseFloat(parts[3]); //we dont want this value but it may be necessary to keep it
 
             if (!isNaN(index) && !isNaN(frequency) && !isNaN(value)) {
                 if (index === 0 && InfoStorage.frequency.length > 0) {
                     // Assign header to the section before storing
                     let assignedHeader = headers[datatStore.length] || `Unknown-${datatStore.length}`;
+                    console.log('Assigned Header:', assignedHeader);
                     datatStore.push({ header: assignedHeader, data: { ...InfoStorage } });
 
                     console.log("Stored Section:", assignedHeader, InfoStorage);

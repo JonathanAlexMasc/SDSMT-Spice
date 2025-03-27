@@ -77,14 +77,16 @@ function endDrawingWire(connectionId) {
 function updateProbeEquations() {
     probeMap.forEach((probe, probeName) => {
       let groupSearcher = probe.conID;
-      //console.log("Group Searcher:", groupSearcher);
-      if (groupMap.has(groupSearcher)) {
-        let sharedValue = groupMap.get(groupSearcher);
-        probe.nodeVal = sharedValue.value;
-        probe.equation = `.probe V(${probe.nodeVal})`;
-        //console.log("Probe Equation:", probe.equation);
+      //if voltage probe, update
+      if(probe.Type == 'VoltProbe') {
+        if (groupMap.has(groupSearcher)) {
+          let sharedValue = groupMap.get(groupSearcher);
+          probe.nodeVal = sharedValue.value;
+          probe.equation = `.probe V(${probe.nodeVal})`;
+          //console.log("Probe Equation:", probe.equation);
+        }
       }
-      //console.log(probe.equation);
+      //if current probe, leave alone, it updates itself
     });
 }
 

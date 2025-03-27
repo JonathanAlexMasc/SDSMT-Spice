@@ -179,6 +179,7 @@ class Entities {
                 }
                 if (NegativeProbe) {
                     currNegProbe = placeNegProbe(conID, con);
+                    updateProbeEquations();
                     //updatePosProbe(currPosProbe);
                     //updateNegProbe(currNegProbe);
                 }
