@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const { exec } = require('child_process');
 const { updateElectronApp } = require('update-electron-app')
+updateElectronApp();
 
 let win;
 
@@ -20,8 +21,6 @@ function createWindow() {
   });
   win.loadFile(path.join(__dirname, 'index.html'));
   win.maximize();
-
-  updateElectronApp();
 }
 
 function loadBuildPage() {
