@@ -163,8 +163,6 @@ function createGroup(startConnection, endConnection) {
     }
   }
   
-  
-  
 // Helper function to find the class instance by its connection ID
 function getClassInstanceByName(name) {
     for (let [key, value] of componentMap) {
@@ -229,6 +227,7 @@ function fabListener(button, rotateButton, deleteButton, clearWiresButton, editB
 }
 
 function deleteComponent(componentId) {
+  console.log("ProbeMap before deletion: ", probeMap);
     // Retrieve the component and its connectors
     const componentData = componentMap.get(componentId);
     if (!componentData) return;
@@ -258,7 +257,11 @@ function deleteComponent(componentId) {
         holder.parentNode.removeChild(holder);
     }
 
-    componentMap.delete(componentId); 
+    probeMap.delete(componentId);
+
+    componentMap.delete(componentId);
+    
+    console.log("ProbeMap after deletion: ", probeMap);
 }
 
 function clearWiresFromComponent(componentId) {
@@ -391,15 +394,11 @@ function attachUpdatedConnectors(component, conectorsArr) {
 
   for (let i = 0; i < bottomConnectors.length; i++) {
     component.instance.attachBot(bottomConnectors[i], bottomConnectors.length, i);
-
-    console.log("Bottom Style: ", bottomConnectors[i].style)
   }
 }
 
 function updateConnectors(component) {
   let connectors = component.connectors;
-  console.log("Component: ", component);
-  console.log("Connectors Pre Rotation: ", connectors);
   connectors.forEach(connector => {
     // Store the current class and corresponding transformation
     let newClass = '';
@@ -434,12 +433,7 @@ function updateConnectors(component) {
 
     // Add the new class
     connector.classList.add(newClass);
-
-    console.log(`componentMap in updateConnectors: ${componentMap}`);
   });
-
-  console.log("Connectors Post Rotation: ", connectors);
-
   attachUpdatedConnectors(component, connectors);
 }
 
@@ -464,7 +458,6 @@ function getComponentFromButton(button) {
 function updateComponentCoordinates(button, newX, newY) {
     const componentInstance = getComponentFromButton(button);
     if (componentInstance) {
-        //console.log(componentInstance); // Check if this is the right instance
         instance = componentInstance.instance;
         instance.updateCoordinates(newX, newY);
     }
@@ -484,7 +477,6 @@ function isOverlappingOtherComponent(elmt) {
             currentRect.left > otherRect.right ||
             currentRect.bottom < otherRect.top ||
             currentRect.top > otherRect.bottom)) {
-        console.log("isOverlappingOtherComponent: Overlap detected with component", other.dataset.componentId);
         return true;
       }
     }
@@ -537,8 +529,6 @@ function isOverlappingOtherComponent(elmt) {
           // Save the current valid position.
           lastValidLeft = elmt.offsetLeft;
           lastValidTop = elmt.offsetTop;
-        } else {
-          console.log("elementDrag: Overlap detected; skipping wire update.");
         }
       }
     }
@@ -565,7 +555,6 @@ function isOverlappingOtherComponent(elmt) {
           updateComponentCoordinates(button, snappedPosition.left, snappedPosition.top);
           
         } else {
-          console.log("closeDragElement: Overlap detected. Reverting to last valid position.");
           elmt.style.left = lastValidLeft + "px";
           elmt.style.top = lastValidTop + "px";
         }
@@ -1058,7 +1047,7 @@ function SimulateCircuit() {
     saveCircuit(false);
     
     // Define the netlist file path.
-    const netlistPath = './Files/netlist.cir';
+    const netlistPath = 'netlist.cir';
     
     // Save the netlist to file and, if successful, navigate to WaveForm.html.
     window.electron.saveNetlistToFile(netlistPath, netlistString)
@@ -1116,13 +1105,11 @@ function generateGrid() {
 
 function placePosProbe(ConnectionID, connector) {
   
-  NegativeProbe = true;
   //console.log(ConnectionID);
   return new VoltProbe(ConnectionID, connector, NegativeProbe);
 }
 
 function placeNegProbe(ConnectionID, connector) {
-  NegativeProbe = false;
   ProbeOn = false;
   wireBlocker = false;
   //console.log(ConnectionID);

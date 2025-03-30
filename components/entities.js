@@ -180,12 +180,14 @@ class Entities {
                 if (NegativeProbe) {
                     currNegProbe = placeNegProbe(conID, con);
                     updateProbeEquations();
+                    NegativeProbe = false;
                     //updatePosProbe(currPosProbe);
                     //updateNegProbe(currNegProbe);
                 }
                 else {
                     //place positive probe
                     currPosProbe = placePosProbe(conID, con);
+                    NegativeProbe = true;
                 }
             }
         })

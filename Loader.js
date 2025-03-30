@@ -21,18 +21,22 @@ function createWindow() {
       preload: path.join(__dirname, 'preloader.js'),
       contextIsolation: true,
       enableRemoteModule: false,
-      devTools: true
+      devTools: true,
+      sandbox: false, 
     },
   });
   win.loadFile(path.join(__dirname, 'index.html'));
   win.maximize();
 }
 
+
 function loadBuildPage() {
   if (win) {
     win.loadFile(path.join(__dirname, 'Build.html'));
   }
 }
+
+const netlistPath = "Files/netlist.cir";
 
 function loadRunPage() {
   if (win) {
@@ -88,25 +92,33 @@ ipcMain.handle('simulate-circuit', async (event, filePath) => {
       ngspicePath = '/opt/homebrew/bin/ngspice'; // Adjust for Intel Macs if needed
     } else {
       // For other platforms, use the original ngspice_con.exe
-      ngspicePath = path.join(__dirname, 'bin', 'Spice64', 'bin', 'ngspice_con.exe');
+      ngspicePath = path.join(process.resourcesPath, 'bin', 'Spice64', 'bin', 'ngspice_con.exe');
+
     }
 
+    if (!fs.existsSync(filePath)) {
+      reject(`Netlist file not found: ${filePath}`);
+      return;
+    }
+    
     // Construct the command to run ngspice
     const command = `"${ngspicePath}" -b "${filePath}"`;
 
     console.log(`Executing command: ${command}`);
 
     exec(command, (error, stdout, stderr) => {
+      console.log(`Command Executed: ${command}`);
       if (error) {
         console.error(`Execution error: ${error.message}`);
         reject(`Execution error: ${error.message}`);
-      } else if (stderr && !stderr.includes('Using SPARSE 1.3 as Direct Linear Solver')) {
-        console.error(`Standard error: ${stderr}`);
-        reject(`Standard error: ${stderr}`);
+      } else if (stderr) {
+        console.warn(`ngspice stderr: ${stderr}`);
+        resolve(stdout);
       } else {
+        console.log(`ngspice stdout: ${stdout}`);
         resolve(stdout);
       }
-    });
+    });    
   });
 });
 
@@ -190,19 +202,27 @@ ipcMain.on('send-netlist-to-waveform', (event, netlistString) => {
 
 ipcMain.handle('save-netlist-to-file', (event, filePath, netlistString) => {
   try {
-    fs.writeFileSync(filePath, netlistString);
-    return true; // Successfully saved
+      filePath = path.join(app.getPath("userData"), "netlist.cir");
+      const dirPath = path.dirname(filePath);
+      if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+      }
+
+      console.log("Saving netlist at:", filePath);
+      fs.writeFileSync(filePath, netlistString);
+      return true; // Successfully saved
   } catch (err) {
-    console.error('Error saving netlist to file:', err);
-    return false; // Failed to save
+      console.error('Error saving netlist to file:', err);
+      return false;
   }
 });
+
 
 ipcMain.handle('check-file-exists', (event, filePath) => {
   return fs.existsSync(filePath);
 });
 
-const tempFilePath = "Files/temp.txt";
+const tempFilePath = path.join(app.getPath("userData"), "temp.txt");
 
 ipcMain.handle('save-temp-circuit', async (event, circuitData) => {
   try {
@@ -228,7 +248,6 @@ ipcMain.handle('save-temp-circuit', async (event, circuitData) => {
   }
 });
 
-
 ipcMain.handle('load-temp-circuit', async () => {
   try {
       const data = fs.readFileSync(tempFilePath, 'utf8');
@@ -237,7 +256,6 @@ ipcMain.handle('load-temp-circuit', async () => {
       throw new Error(`Error reading file: ${error.message}`);
     }
 });
-
 
 // Zoom In functionality
 ipcMain.handle('zoom-in', (event) => {
@@ -275,4 +293,8 @@ ipcMain.handle('load-run-page', async (event) => {
 
 ipcMain.handle('get-logo-path', () => {
   return path.join(__dirname, 'assets', 'logo.png');
+});
+
+ipcMain.handle('get-user-data-path', () => {
+  return app.getPath("userData");
 });

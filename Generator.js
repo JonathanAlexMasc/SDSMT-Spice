@@ -673,12 +673,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   validSim.classList.add('invalid');
   validSim.disabled = true;
 
-  const netlistPath = './Files/netlist.cir';
+  (async () => {
+  const userDataPath = await window.electron.getUserDataPath();
+  const netlistPath = window.electron.joinPath(userDataPath, "netlist.cir");
+
+  const fileExists = await window.electron.checkFileExists(netlistPath);
   
-  const fileExists = window.electron.checkFileExists(netlistPath);
-  
-  if (fileExists) { // File exists
-    const netlistContent = await readFile(netlistPath);
+  if (fileExists) {
+    const netlistContent = await window.electron.readFile(netlistPath);
     let isValidNetlist = validateNetlist(netlistContent);
     document.getElementById('fileHolder').textContent = 'netlist.cir';
     document.getElementById('simulateButton').dataset.filePath = netlistPath;
@@ -708,7 +710,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } else {
     console.log('Netlist file does not exist, skipping initialization.');
-  }
+  }})();
 
   document.getElementById('viewData').addEventListener('click', saveOutput);
 
