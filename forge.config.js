@@ -8,6 +8,9 @@ module.exports = {
     rebuildConfig: {},
     makers: [
         {
+            name: '@electron-forge/maker-zip'
+        },
+        {
             name: '@electron-forge/maker-squirrel',
             config: {
                 bin: 'Habanero Spice'
