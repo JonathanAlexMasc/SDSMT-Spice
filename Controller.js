@@ -257,11 +257,41 @@ function deleteComponent(componentId) {
         holder.parentNode.removeChild(holder);
     }
 
-    probeMap.delete(componentId);
+
+    const keys = Array.from(probeMap.keys());
+    keys.forEach(key => {
+      if (key.includes(componentId)) {
+        console.log(`Deleting probe key: ${key} (associated with ${componentId})`);
+        // Delete its paired probe (if it exists)
+        deleteProbePair(key);
+        
+        probeMap.delete(key);
+      }
+    });
 
     componentMap.delete(componentId);
     
     console.log("ProbeMap after deletion: ", probeMap);
+}
+
+function deleteProbePair(probeKey) {
+  const regex = /VoltProbe(\d+)$/;
+  const match = probeKey.match(regex);
+  if (!match) return; // no match, nothing to do
+  let num = parseInt(match[1], 10);
+  let pairedNum = (num % 2 === 1) ? num + 1 : num - 1; // odd -> delete next; even -> delete previous
+  // Form the expected suffix of the paired key:
+  const pairedSuffix = "VoltProbe" + pairedNum;
+
+  // Look for any key in probeMap whose name ends with the pairedSuffix.
+  for (const key of Array.from(probeMap.keys())) {
+    if (key.endsWith(pairedSuffix)) {
+      console.log(`Deleting paired probe key: ${key}`);
+      document.getElementById(key)?.remove();
+      probeMap.delete(key);
+      break; // assume one match is enough
+    }
+  }
 }
 
 function clearWiresFromComponent(componentId) {

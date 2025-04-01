@@ -2,7 +2,8 @@
 const path = require('path');
 module.exports = {
     packagerConfig: {
-        asar: true
+        asar: true,
+        extraResource: ['bin']
     },
     rebuildConfig: {},
     makers: [
