@@ -1,6 +1,6 @@
 {
   "name": "sdm-spice",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Electronic Circuit Simulator",
   "main": "Loader.js",
   "scripts": {
