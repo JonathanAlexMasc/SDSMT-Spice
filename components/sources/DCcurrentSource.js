@@ -1,10 +1,10 @@
 // Class for Voltage Source, extends Entities
-class DCVolt extends Entities {
-    static VoltID = 0;
+class DCCURR extends Entities {
+    static DCCURRID = 0;
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "VD" + ++DCVolt.VoltID; // Unique name for each Volt instance
-        this.imgSrc = "images/Voltage/VoltageSources/DC_Volt.svg";        // Image path for Volt
+        this.name = "ID" + ++DCCURR.DCCURRID; // Unique name for each Volt instance
+        this.imgSrc = "images/Voltage/CurrentSources/DC_Curr.svg";        // Image path for Volt
         this.x = posx;
         this.y = posy;
         this.intX = parseInt(this.x, 10);
@@ -71,7 +71,7 @@ class DCVolt extends Entities {
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modify DC Voltage Values</h5>
+                    <h5 class="modal-title">Modify DC Current Values</h5>
                 </div>
                 <div class="modal-body">
                     <div class="input-group">
@@ -105,12 +105,12 @@ class DCVolt extends Entities {
     }
 
     static resetID() {
-        Volt.VoltID = 0;
+        DCCURR.DCCURRID = 0;
     }
 }
 
-window.DCVolt = DCVolt;
+window.DCCURR = DCCURR;
 
-export function AddDCVoltage(posx, posy) {
-    return new DCVolt(posx, posy);
+export function AddDCcurrentSource(posx, posy) {
+    return new DCCURR(posx, posy);
 }

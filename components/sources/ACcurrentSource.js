@@ -1,10 +1,10 @@
 // Class for Voltage Source, extends Entities
-class Volt extends Entities {
-    static VoltID = 0;
+class ACcurrentSource extends Entities {
+    static CurrentSrcID = 0;
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "V" + ++Volt.VoltID; // Unique name for each Volt instance
-        this.imgSrc = "images/Voltage/VoltageSources/Sine_Volt.svg";        // Image path for Volt
+        this.name = "I" + ++ACcurrentSource.CurrentSrcID; // Unique name for each Volt instance
+        this.imgSrc = "images/Voltage/CurrentSources/Sine_Curr.svg";        // Image path for Volt
         this.x = posx;
         this.y = posy;
         this.intX = parseInt(this.x, 10);
@@ -74,20 +74,20 @@ class Volt extends Entities {
         console.log(this.WaveType);
         if (this.WaveType === "SINE") {
             console.log("Were here @ SINE");
-            this.imgSrc = "images/Voltage/VoltageSources/Sine_Volt.svg";
+            this.imgSrc = "images/Voltage/CurrentSources/Sine_Curr.svg";
         }
         else if (this.WaveType === "SQUARE") {
             console.log("Were here @ SQUARE");
-            this.imgSrc = "images/Voltage/VoltageSources/Square_Volt.svg";
+            this.imgSrc = "images/Voltage/CurrentSources/Square_Curr.svg";
         }
         else if (this.WaveType === "TRIANGLE") {
             console.log("Were here @ TRIANGLE");
-            this.imgSrc = "images/Voltage/VoltageSources/Tri_Volt.svg";
+            this.imgSrc = "images/Voltage/CurrentSources/Tri_Curr.svg";
             console.log(this.imgSrc);
         }
         else if (this.WaveType === "SAWTOOTH") {
             console.log("Were here @ SAWTOOTH");
-            this.imgSrc = "images/Voltage/VoltageSources/Saw_Volt.svg";
+            this.imgSrc = "images/Voltage/CurrentSources/Saw_Curr.svg";
             console.log(this.imgSrc);
         }
         let voltButton = document.getElementById('component-button-' + this.name);
@@ -97,14 +97,14 @@ class Volt extends Entities {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = "ACModal";
+        modal.id = "ACCurrentModal";
         modal.tabIndex = -1;
 
         modal.innerHTML = `
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modify AC Voltage Values</h5>
+                    <h5 class="modal-title">Modify AC Current Values</h5>
                 </div>
                 <div class="modal-body">
                     <div class="input-group">
@@ -168,12 +168,12 @@ class Volt extends Entities {
 
 
     static resetID() {
-        Volt.VoltID = 0;
+        ACcurrentSource.CurrentSrcID = 0;
     }
 }
 
-window.Volt = Volt;
+window.ACcurrentSource = ACcurrentSource;
 
-export function AddVoltage(posx, posy) {
-    return new Volt(posx, posy);
+export function AddACcurrentSource(posx, posy) {
+    return new ACcurrentSource(posx, posy);
 }
