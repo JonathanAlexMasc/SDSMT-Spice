@@ -4,6 +4,8 @@ import { AddCapacitor } from "./components/loads/capacitor.js";
 import { AddInductor } from "./components/loads/inductor.js";
 import { AddVoltage } from "./components/sources/voltage.js";
 import { AddDCVoltage } from "./components/sources/DCVoltage.js";
+import { AddDCcurrentSource } from "./components/sources/DCcurrentSource.js";
+import { AddACcurrentSource } from "./components/sources/ACcurrentSource.js";
 import { AddDiode } from "./components/diodes/diode.js";
 import { AddGround } from "./components/common/ground.js";
 import { AddZener } from "./components/diodes/zener.js";
@@ -82,6 +84,14 @@ document.getElementById('volt_btn').addEventListener('click', function () {
 
 document.getElementById('dcVolt_btn').addEventListener('click', function () {
     AddDCVoltage();
+});
+
+document.getElementById('DcCurr_btn').addEventListener('click', function () {
+    AddDCcurrentSource();
+});
+
+document.getElementById('AcCurr_btn').addEventListener('click', function () {
+    AddACcurrentSource();
 });
 
 document.getElementById('opAmp_btn').addEventListener('click', function () {
