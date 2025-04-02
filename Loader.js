@@ -89,11 +89,9 @@ ipcMain.handle('simulate-circuit', async (event, filePath) => {
 
     if (os.platform() === 'darwin') {
       // For macOS, use the Homebrew-installed ngspice
-      ngspicePath = '/opt/homebrew/bin/ngspice'; // Adjust for Intel Macs if needed
+      ngspicePath = '/opt/homebrew/bin/ngspice';
     } else {
-      // For other platforms, use the original ngspice_con.exe
       ngspicePath = path.join(process.resourcesPath, 'bin', 'Spice64', 'bin', 'ngspice_con.exe');
-
     }
 
     if (!fs.existsSync(filePath)) {
