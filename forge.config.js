@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
     packagerConfig: {
         asar: false,
-        extraResource: ['bin']
+        extraResource: ['bin', 'assets']
     },
     rebuildConfig: {},
     makers: [
