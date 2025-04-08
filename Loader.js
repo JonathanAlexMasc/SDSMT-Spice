@@ -86,8 +86,12 @@ ipcMain.handle('simulate-circuit', async (event, filePath) => {
   return new Promise((resolve, reject) => {
     // Check the platform
     let ngspicePath;
+    console.log(os.platform());
+    console.log("Checking Platform");
+    console.log("In Simulate circuit");
 
     if (os.platform() === 'darwin') {
+        console.log("macOS detected");
       // For macOS, use the Homebrew-installed ngspice
       ngspicePath = '/opt/homebrew/bin/ngspice';
     } else {
