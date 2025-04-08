@@ -1,9 +1,9 @@
 // Class for Voltage Source, extends Entities
 class DCVolt extends Entities {
-    static VoltID = 0;
+    static DCVoltID = 0;
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "VD" + ++DCVolt.VoltID; // Unique name for each Volt instance
+        this.name = "VD" + ++DCVolt.DCVoltID; // Unique name for each Volt instance
         this.imgSrc = "images/Voltage/VoltageSources/DC_Volt.svg";        // Image path for Volt
         this.x = posx;
         this.y = posy;
@@ -105,7 +105,7 @@ class DCVolt extends Entities {
     }
 
     static resetID() {
-        Volt.VoltID = 0;
+        DCVolt.DCVoltID = 0;
     }
 }
 

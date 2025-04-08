@@ -956,7 +956,9 @@ function loadCircuit(savedDataString) {
 function getComponentClass(name) {
     console.log("Component Name in getComponentClass: ", name)
 
-    if (name.startsWith("VD")) return DCVolt;
+    if (name.includes("VD")) return DCVolt;
+    if (name.includes("ID")) return DCCURR;
+    if (name.startsWith("I")) return ACcurrentSource;
     if (name.startsWith("V")) return Volt;
     if (name.startsWith("R")) return Resistor;
     if (name.startsWith("L")) return Inductor;
@@ -1032,6 +1034,9 @@ function clearCircuit() {
     // Reset component positions
     componentPositions = {};
     window.Volt.resetID();
+    window.DCVolt.resetID();
+    window.ACcurrentSource.resetID();
+    window.DCCURR.resetID();
     window.Resistor.resetID();
     window.Inductor.resetID();
     window.Gnd.resetID();
