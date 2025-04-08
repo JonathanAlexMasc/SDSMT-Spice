@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <label for="stopVolt">Stop Voltage:</label>
           <input type="number" id="stopVolt" value="${endVolt}" placeholder="Enter stop voltage">
           <label for="step">Step Size:</label>
-          <input type="number" id="step" value="${step}" placeholder="Enter step size">
+          <input type="number" id="step" step="0.1" value="${step}" placeholder="Enter step size">
         `;
                 document.getElementById('startVolt').addEventListener('input', (e) => startVolt = parseFloat(e.target.value));
                 document.getElementById('stopVolt').addEventListener('input', (e) => endVolt = parseFloat(e.target.value));
@@ -633,7 +633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <label for="stopTime">Stop Time:</label>
           <input type="number" id="stopTime" value="${stopTime}" placeholder="Enter stop time">
           <label for="timeStep">Time Step:</label>
-          <input type="number" id="timeStep" value="${timeStep}" placeholder="Enter time step">
+          <input type="number" id="timeStep" step="0.1" value="${timeStep}" placeholder="Enter time step">
         `;
                 document.getElementById('startTime').addEventListener('input', (e) => startTime = parseFloat(e.target.value));
                 document.getElementById('stopTime').addEventListener('input', (e) => stopTime = parseFloat(e.target.value));

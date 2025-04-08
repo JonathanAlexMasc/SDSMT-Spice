@@ -5,7 +5,8 @@
   "main": "Loader.js",
   "scripts": {
     "test": "playwright test",
-    "start": "electron . start",
+    "start": "electron-forge start",
+    "dev": "electron . start",
     "make": "electron-forge make",
     "package": "electron-forge package",
     "wdio": "wdio run ./wdio.conf.js",
