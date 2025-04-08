@@ -8,7 +8,10 @@ var dx = 2 * Math.PI / numPoints;
 var plotType = 'ACSweep';
 let controlSwitch = false;
 let RawData = '';
+var VoltType = '';
 var VoltName = '';
+var CurrentType = '';
+var CurrentName = '';
 const maxPoints = 7000;
 
 let originalWaveForm = '';
@@ -326,7 +329,7 @@ function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
     });
 
     nodeValCurrMap.forEach((_, nodeVal) => {  // We don't need the value, just the key (nodeVal)
-      printLines += `print I(${nodeVal})\n`;
+      printLines += `print ${nodeVal}\n`;
     });
     return printLines;
   }
@@ -377,14 +380,14 @@ function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
         break;
     }
     //current probes
-    for (let i = 0; i < currentProbes.length; i += 2) {
+    for (let i = 0; i < currentProbes.length; i++) {
       if (currentProbes[i] == 0) {
         //cant be 0
         console.log("Current probe is 0, do not add");
         continue;
       }
       else {
-        printLines += `print I(${currentProbes[i]})\n`;
+        printLines += `print ${currentProbes[i]}\n`;
       }
     }
     return printLines;
@@ -449,11 +452,31 @@ async function ModifyNetlist(filePath) {
 
     for (let line of lines) {
       let parts = line.trim().split(/\s+/); // Split by spaces/tabs
-      if (parts.length > 1 && parts[0].match(/^[Vv][A-Za-z0-9]*$/)) {
-          VoltName = parts[0]; // The first part is the voltage source name
-          break;
-      }
-  }
+      if (parts.length > 1) {
+          let sourceType = parts[0];
+  
+          if (/^V[Dd]?$/i.test(sourceType)) {
+              if (/^V[Dd]$/i.test(sourceType)) {
+                  VoltType = "DC Voltage";
+              } else {
+                  VoltType = "Standard Voltage";
+              }
+              VoltName = sourceType;
+              break;
+          } 
+          else if (/^I[Dd]?$/i.test(sourceType)) {
+              if (/^I[Dd]$/i.test(sourceType)) {
+                  CurrentType = "DC Current";
+              } else {
+                  CurrentType = "AC Current";
+              }
+              VoltName = sourceType;
+              break;
+            }
+          }
+        }
+      
+  
 
   //This gives us .control
   //+ simulation type
