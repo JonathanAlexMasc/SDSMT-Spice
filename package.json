@@ -6,6 +6,7 @@
   "scripts": {
     "test": "playwright test",
     "start": "electron-forge start",
+    "dev": "electron . start",
     "make": "electron-forge make",
     "package": "electron-forge package",
     "wdio": "wdio run ./wdio.conf.js",
