@@ -493,25 +493,35 @@ function updateComponentCoordinates(button, newX, newY) {
     }
 }
 
-function isOverlappingOtherComponent(elmt) {
-    const currentRect = elmt.getBoundingClientRect();
-    const others = document.querySelectorAll('[data-component-id]');
-    
-    for (let other of others) {
-      // Skip if the other element is inside the same draggable element.
-      if (elmt.contains(other)) continue;
-      
-      const otherRect = other.getBoundingClientRect();
-      // Check if the two rectangles intersect.
-      if (!(currentRect.right < otherRect.left ||
-            currentRect.left > otherRect.right ||
-            currentRect.bottom < otherRect.top ||
-            currentRect.top > otherRect.bottom)) {
-        return true;
-      }
+function isOverlappingOtherComponent(elmt, buffer = 10) {
+  const currentRect = elmt.getBoundingClientRect();
+  const others = document.querySelectorAll('[data-component-id]');
+
+  for (let other of others) {
+    if (elmt.contains(other)) continue;
+
+    const otherRect = other.getBoundingClientRect();
+
+    // Inflate the other component's bounding box
+    const expandedOtherRect = {
+      top: otherRect.top - buffer,
+      bottom: otherRect.bottom + buffer,
+      left: otherRect.left - buffer,
+      right: otherRect.right + buffer,
+    };
+
+    // Check if the two rectangles intersect
+    if (!(currentRect.right < expandedOtherRect.left ||
+          currentRect.left > expandedOtherRect.right ||
+          currentRect.bottom < expandedOtherRect.top ||
+          currentRect.top > expandedOtherRect.bottom)) {
+      return true;
     }
-    return false;
   }
+
+  return false;
+}
+
   
   function dragElement(elmt) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
