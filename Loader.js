@@ -91,7 +91,7 @@ ipcMain.handle('simulate-circuit', async (event, filePath) => {
       // For macOS, use the Homebrew-installed ngspice
       ngspicePath = '/opt/homebrew/bin/ngspice';
     } else {
-      ngspicePath = path.join(process.resourcesPath, 'bin', 'Spice64', 'bin', 'ngspice_con.exe');
+      ngspicePath = path.join(__dirname, 'bin', 'Spice64', 'bin', 'ngspice_con.exe');
     }
 
     if (!fs.existsSync(filePath)) {
