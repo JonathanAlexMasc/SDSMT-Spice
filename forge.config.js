@@ -2,7 +2,7 @@
 const path = require('path');
 module.exports = {
     packagerConfig: {
-        asar: false,
+        asar: true,
         extraResource: ['bin', 'assets']
     },
     rebuildConfig: {},
@@ -33,6 +33,12 @@ module.exports = {
             config: {
                 bin: 'Habanero Spice'
             }
+        }
+    ],
+    plugins: [
+        {
+            name: '@electron-forge/plugin-auto-unpack-natives',
+            config: {}
         }
     ],
     publishers: [
