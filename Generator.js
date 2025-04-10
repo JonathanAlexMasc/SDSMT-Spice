@@ -849,7 +849,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             cleanedOutput = parseTransData(rawOutput);
                             if (outPutType == 'Table') {
                                 console.log('Table');
-                                //MakeTranTable(cleanedOutput);
+                                GenerateTransientTable(cleanedOutput);
                             }
                             else if (outPutType == 'Graph') {
                                 console.log('Graph');
@@ -861,7 +861,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             cleanedOutput = parseACSweepData(rawOutput);
                             if (outPutType == 'Table') {
                                 console.log('Table');
-                                //MakeACTable(cleanedOutput);
+                                GenerateACSweepTable(cleanedOutput);
                             }
                             else if (outPutType == 'Graph') {
                                 console.log('Graph');
@@ -873,7 +873,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             if (outPutType == 'Table') {
                                 console.log('Table');
                                 plotDCOP(cleanedOutput); //table
-                                //MakeDCOPTable(cleanedOutput);
                             }
                             else if (outPutType == 'Graph') {
                                 alert("DC OP Graph not supported, please use table output instead");
@@ -884,7 +883,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             cleanedOutput = parseDCData(rawOutput);
                             if (outPutType == 'Table') {
                                 console.log('Table');
-                                //MakeDCSweepTable(cleanedOutput);
+                                GenerateDCSweepTable(cleanedOutput);
                             }
                             else if (outPutType == 'Graph') {
                                 console.log('Graph');
