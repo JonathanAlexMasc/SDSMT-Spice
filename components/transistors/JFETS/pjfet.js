@@ -1,15 +1,18 @@
 class PJFET extends BaseTransistor {
-    static PJFET_ID = 0;
+    static id = 0;
 
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
         this.x = posx;
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "QPJFET" + ++PJFET.PJFET_ID;
+        this.name = "QPJFET" + ++PJFET.id;
         this.imgSrc = "images/Transistor/P-Channel_FET_5W.svg";
-        this.modelName = `QPJFET_model_${PJFET.PJFET_ID}`;
+        this.modelName = `QPJFET_model_${PJFET.id}`;
         this.info = this.modelName;
         this.equation = this.name;
         this.Currconnections = [];
@@ -35,7 +38,7 @@ class PJFET extends BaseTransistor {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `pjfetModal${PJFET.PJFET_ID}`;
+        modal.id = `pjfetModal${PJFET.id}`;
         modal.tabIndex = -1;
         modal.innerHTML = `
         <style>
@@ -138,7 +141,7 @@ class PJFET extends BaseTransistor {
     }
     
     static resetID() {
-        PJFET.PJFET_ID = 0;
+        PJFET.id = 0;
     }
 }
 

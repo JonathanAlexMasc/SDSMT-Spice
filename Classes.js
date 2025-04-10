@@ -136,16 +136,15 @@ class VoltProbe extends Probe {
         probeMap.set(this.name, this);
     }
     buildProbe() {
-        if(this.TypeVal == false) { //positive probe
-            this.imgSrc = this.posProbeImg;
-        } else { //negative probe
-            this.imgSrc = this.negProbeImg;
-        }
+        this.imgSrc = this.TypeVal == false ? this.posProbeImg : this.negProbeImg;
+    
         let probeButton = document.createElement("button");
-        probeButton.style.position = 'relative'; // Position relative to the parent
-        probeButton.style.top = '50%';          // Center vertically
-        probeButton.style.right = '0';          // Align to the right edge
-        probeButton.style.transform = 'translateY(-85%)'; // Adjust to center vertically
+        probeButton.classList.add("probe-icon");
+        probeButton.dataset.name = this.name;
+        probeButton.style.position = 'relative';
+        probeButton.style.top = '50%';
+        probeButton.style.right = '0';
+        probeButton.style.transform = 'translateY(-85%)';
         probeButton.style.backgroundImage = `url("${this.imgSrc}")`;
         probeButton.style.border = "none";
         probeButton.style.width = "30px";
@@ -153,8 +152,10 @@ class VoltProbe extends Probe {
         probeButton.style.backgroundSize = "cover";
         probeButton.style.backgroundPosition = "center";
         probeButton.style.backgroundColor = "transparent";
+    
         this.ConButton.appendChild(probeButton);
     }
+    
     styleProbe() {
         //style probe
     }

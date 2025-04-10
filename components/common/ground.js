@@ -1,10 +1,16 @@
 // Class for Ground (GND), extends Entities
 class Gnd extends Entities {
-    static gndID = 0;
+    static id = 0;
+    static resetID() {
+        this.id = 0;}
+
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "Ground" + ++Gnd.gndID; // Unique name for each GND instance
+        this.name = "Ground" + ++Gnd.id; // Unique name for each GND instance
         this.imgSrc = "images/Ground/ground.svg";     // Image path for GND
         this.x = posx;
         this.y = posy;
@@ -48,9 +54,7 @@ class Gnd extends Entities {
         this.equation = "";
     }
 
-    static resetID() {
-        Gnd.gndID = 0;
-    }
+    
 }
 
 window.Gnd = Gnd;

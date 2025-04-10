@@ -1,6 +1,10 @@
 // Class for Inductor, extends Entities
 class Inductor extends Load {
-    static inductorID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
@@ -8,7 +12,7 @@ class Inductor extends Load {
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "L" + ++Inductor.inductorID;
+        this.name = "L" + ++Inductor.id;
         this.imgSrc = "images/Inductor/inductor.svg";                    
         this.info = "1u";
         this.unit = 'H';
@@ -103,7 +107,7 @@ class Inductor extends Load {
         });
     }
     static resetID() {
-        Inductor.inductorID = 0;
+        Inductor.id = 0;
     }
 }
 

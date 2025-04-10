@@ -1,5 +1,9 @@
 export class Zener extends BaseDiode {
-    static zenerID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
@@ -7,9 +11,9 @@ export class Zener extends BaseDiode {
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "DZener" + ++Zener.zenerID;
+        this.name = "DZener" + ++Zener.id;
         this.imgSrc = "images/Diode/zen-diode.svg";
-        this.modelName = `Z_MODEL_${Zener.zenerID}`;
+        this.modelName = `Z_MODEL_${Zener.id}`;
         this.info = this.modelName
         this.equation = this.name;
         this.Currconnections = [];
@@ -28,13 +32,13 @@ export class Zener extends BaseDiode {
     }
 
     static resetID() {
-        Zener.zenerID = 0;
+        Zener.id = 0;
     }
 
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `zenerModal${Zener.zenerID}`;
+        modal.id = `zenerModal${Zener.id}`;
         modal.tabIndex = -1;
 
         modal.innerHTML = `

@@ -1,5 +1,9 @@
 class Capacitor extends Load {
-    static capID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
@@ -7,7 +11,7 @@ class Capacitor extends Load {
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "C" + ++Capacitor.capID;
+        this.name = "C" + ++Capacitor.id;
         this.imgSrc = "images/Capacitor/capacitor.svg";                 
         this.info = "1u";
         this.unit = 'F';
@@ -104,7 +108,7 @@ class Capacitor extends Load {
     }
 
     static resetID() {
-        Capacitor.capID = 0;
+        Capacitor.id = 0;
     }
 }
 

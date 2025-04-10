@@ -1,15 +1,18 @@
 class NJFET extends BaseTransistor {
-    static NJFET_ID = 0;
+    static id = 0;
 
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
         this.x = posx;
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "QNJFET" + ++NJFET.NJFET_ID;
+        this.name = "QNJFET" + ++NJFET.id;
         this.imgSrc = "images/Transistor/N-Channel_FET_5W.svg";
-        this.modelName = `QJNFET_model_${NJFET.NJFET_ID}`;
+        this.modelName = `QJNFET_model_${NJFET.id}`;
         this.info = this.modelName;
         this.equation = this.name;
         this.Currconnections = [];
@@ -35,7 +38,7 @@ class NJFET extends BaseTransistor {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `njfetModal${NJFET.NJFET_ID}`;
+        modal.id = `njfetModal${NJFET.id}`;
         modal.tabIndex = -1;
         modal.innerHTML = `
         <style>
@@ -138,7 +141,7 @@ class NJFET extends BaseTransistor {
     }
 
     static resetID() {
-        NJFET.NJFET_ID = 0;
+        NJFET.id = 0;
     }
 }
 

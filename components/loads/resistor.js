@@ -1,5 +1,9 @@
 class Resistor extends Load {
-    static resID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
@@ -7,7 +11,7 @@ class Resistor extends Load {
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "R" + ++Resistor.resID;
+        this.name = "R" + ++Resistor.id;
         this.imgSrc = "images/Resistor/resistor.svg";
         this.info = "1k";
         this.unit = 'Ω';
@@ -101,7 +105,7 @@ class Resistor extends Load {
     }
 
     static resetID() {
-        Resistor.resID = 0;
+        Resistor.id = 0;
     }
 }
 

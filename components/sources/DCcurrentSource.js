@@ -1,9 +1,13 @@
 // Class for Voltage Source, extends Entities
 class DCCURR extends Entities {
-    static DCCURRID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "ID" + ++DCCURR.DCCURRID; // Unique name for each Volt instance
+        this.name = "ID" + ++DCCURR.id; // Unique name for each Volt instance
         this.imgSrc = "images/Voltage/CurrentSources/DC_Curr.svg";        // Image path for Volt
         this.x = posx;
         this.y = posy;
@@ -105,7 +109,7 @@ class DCCURR extends Entities {
     }
 
     static resetID() {
-        DCCURR.DCCURRID = 0;
+        DCCURR.id = 0;
     }
 }
 

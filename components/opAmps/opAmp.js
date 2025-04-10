@@ -1,5 +1,9 @@
 class OPAMP extends Entities {
-    static OpAmpID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         // base
         super();
@@ -7,7 +11,7 @@ class OPAMP extends Entities {
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "xU" + ++OPAMP.OpAmpID;
+        this.name = "xU" + ++OPAMP.id;
         this.imgSrc = "images/OpAmp/opAmp.svg";
         this.hasSubckt = true;
 
@@ -23,8 +27,8 @@ class OPAMP extends Entities {
         this.VOMN = -12;
 
         // Modelling
-        this.shortModelName = `xMODU${OPAMP.OpAmpID}`
-        this.modelName = `xMODU${OPAMP.OpAmpID} PARAMS: VOS=${this.VOS} IBS=${this.IBS} IOS=${this.IOS} AVOL=${this.AVOL} BW=${this.BW} RI=${this.RI} RO=${this.RO} VOMP=${this.VOMP} VOMN=${this.VOMN}`
+        this.shortModelName = `xMODU${OPAMP.id}`
+        this.modelName = `xMODU${OPAMP.id} PARAMS: VOS=${this.VOS} IBS=${this.IBS} IOS=${this.IOS} AVOL=${this.AVOL} BW=${this.BW} RI=${this.RI} RO=${this.RO} VOMP=${this.VOMP} VOMN=${this.VOMN}`
 
         this.info = this.modelName
         this.equation = this.name;
@@ -236,7 +240,7 @@ class OPAMP extends Entities {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `opAmpModal${OPAMP.OpAmpID}`;
+        modal.id = `opAmpModal${OPAMP.id}`;
         modal.tabIndex = -1;
 
         modal.innerHTML = `
@@ -339,7 +343,7 @@ class OPAMP extends Entities {
     }
 
     static resetID() {
-        OPAMP.OpAmpID = 0;
+        OPAMP.id = 0;
     }
 }
 

@@ -1,14 +1,18 @@
 class NMOS extends BaseTransistor {
-    static NMOS_ID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
         this.x = posx;
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "QNMOS" + ++NMOS.NMOS_ID;
+        this.name = "QNMOS" + ++NMOS.id;
         this.imgSrc = "images/Transistor/N-Channel_MOSFET_5W.svg";
-        this.modelName = `QNMOS_model_${NMOS.NMOS_ID}`;
+        this.modelName = `QNMOS_model_${NMOS.id}`;
         this.info = this.modelName;
         this.equation = this.name;
         this.Currconnections = [];
@@ -33,7 +37,7 @@ class NMOS extends BaseTransistor {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `nmosModal${NMOS.NMOS_ID}`;
+        modal.id = `nmosModal${NMOS.id}`;
         modal.tabIndex = -1;
         modal.innerHTML = `
         <style>
@@ -134,7 +138,7 @@ class NMOS extends BaseTransistor {
 
 
     static resetID() {
-        NMOS.NMOS_ID = 0;
+        NMOS.id = 0;
     }
 }
 

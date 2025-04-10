@@ -1,5 +1,8 @@
 export class LED extends BaseDiode {
-    static LED_ID = 0;
+    static id = 0;
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
@@ -7,9 +10,9 @@ export class LED extends BaseDiode {
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "DLED" + ++LED.LED_ID;
+        this.name = "DLED" + ++LED.id;
         this.imgSrc = "images/Diode/led-diode.svg";
-        this.modelName = `LED_MODEL_${LED.LED_ID}`;
+        this.modelName = `LED_MODEL_${LED.id}`;
         this.info = this.modelName
         this.equation = this.name;
         this.Currconnections = [];
@@ -33,13 +36,13 @@ export class LED extends BaseDiode {
     }
 
     static resetID() {
-        LED.LED_ID = 0;
+        LED.id = 0;
     }
 
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `LEDModal${LED.LED_ID}`;
+        modal.id = `LEDModal${LED.id}`;
         modal.tabIndex = -1;
 
         modal.innerHTML = `

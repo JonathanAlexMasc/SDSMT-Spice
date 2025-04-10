@@ -237,6 +237,7 @@ function deleteComponent(componentId) {
     
     // Remove connectors from the DOM
     connectors.forEach(connector => {
+      console.log("Deleting connector: ", connector);
         if (connector && connector.parentNode) {
             connector.parentNode.removeChild(connector);
         }
@@ -275,24 +276,65 @@ function deleteComponent(componentId) {
 }
 
 function deleteProbePair(probeKey) {
-  const regex = /VoltProbe(\d+)$/;
+  const regex = /(.+?)-(.+?)-(VoltProbe\d+)$/;
   const match = probeKey.match(regex);
-  if (!match) return; // no match, nothing to do
-  let num = parseInt(match[1], 10);
-  let pairedNum = (num % 2 === 1) ? num + 1 : num - 1; // odd -> delete next; even -> delete previous
-  // Form the expected suffix of the paired key:
-  const pairedSuffix = "VoltProbe" + pairedNum;
+  if (!match) return;
 
-  // Look for any key in probeMap whose name ends with the pairedSuffix.
+  const [ , componentId, connectorId, probeName ] = match;
+  const probeNumMatch = probeName.match(/VoltProbe(\d+)/);
+  if (!probeNumMatch) return;
+
+  let num = parseInt(probeNumMatch[1], 10);
+  let pairedNum = (num % 2 === 1) ? num + 1 : num - 1;
+  const pairedSuffix = `VoltProbe${pairedNum}`;
+
+  // Delete paired probe first
   for (const key of Array.from(probeMap.keys())) {
     if (key.endsWith(pairedSuffix)) {
-      console.log(`Deleting paired probe key: ${key}`);
+      const pairedMatch = key.match(/(.+?)-(.+?)-VoltProbe\d+$/);
+      const pairedComponentId = pairedMatch?.[1];
+      const pairedConnectorId = pairedMatch?.[2];
+      const componentData = componentMap.get(pairedComponentId);
+      if (componentData) {
+        const { connectors } = componentData;
+
+        connectors.forEach(connector => {
+          if (connector.id === (pairedComponentId + "-" + pairedConnectorId)) {
+            const probeElement = connector.querySelector(`.probe-icon[data-name="${key}"]`);
+            if (probeElement) {
+              probeElement.remove();
+            }
+          }
+        });
+      }
+
       document.getElementById(key)?.remove();
       probeMap.delete(key);
-      break; // assume one match is enough
+      break;
     }
   }
+
+  // Now delete the original probe's visual
+  const originalComponentData = componentMap.get(componentId);
+  if (originalComponentData) {
+    const { connectors } = originalComponentData;
+
+    connectors.forEach(connector => {
+      if (connector.id === connectorId) {
+        const probeElement = connector.querySelector(`.probe-icon[data-name="${key}"]`);
+        if (probeElement) {
+          
+          probeElement.remove();
+        }
+      }
+    });
+  }
+
+  document.getElementById(probeKey)?.remove();
+  probeMap.delete(probeKey);
 }
+
+
 
 function clearWiresFromComponent(componentId) {
     // Retrieve component data (including its connectors) from componentMap.
@@ -810,6 +852,67 @@ function loadCircuit(savedDataString) {
             throw new Error("Grid or circuit canvas element is missing in the DOM.");
         }
 
+        // Step 1: Scan all component IDs to update their type counters
+        const classMaxIds = new Map(); // Class => max number
+
+        savedData.components.forEach(({ id }) => {
+          const match = id.match(/^([A-Za-z]+)(\d+)$/);
+          if (!match) {
+            console.warn("Component ID format invalid:", id);
+            return;
+          }
+
+          const [ , prefix, numStr ] = match;
+          const num = parseInt(numStr, 10);
+
+          const cls = getComponentClass(id); // ← very important
+          if (!cls) {
+            console.warn("No class found for ID:", id);
+            return;
+          }
+
+          const currentMax = classMaxIds.get(cls) || 0;
+          if (num > currentMax) {
+            classMaxIds.set(cls, num);
+          }
+        });
+
+
+      // Step 2: Update component IDs
+
+
+        const typeToClassMap = {
+          R: window.Resistor,
+          L: window.Inductor,
+          C: window.Capacitor,
+          V: window.Volt,
+          VD: window.DCVolt,
+          I: window.DCCURR,
+          AC: window.ACcurrentSource,
+          G: window.Gnd,
+          D: window.Diode,
+          Z: window.Zener,
+          LED: window.LED,
+          NPN: window.NPN,
+          PNP: window.PNP,
+          NJFET: window.NJFET,
+          PJFET: window.PJFET,
+          NMOS: window.NMOS,
+          PMOS: window.PMOS,
+          T: window.Thyristor,
+          xU: window.OPAMP,
+          // Add more if you have more types
+      };
+      
+      for (const [cls, max] of classMaxIds.entries()) {
+        if (typeof cls.setID === 'function') {
+          console.log(`Setting ID for ${cls.name} to ${max}`);
+          cls.setID(max-1);
+        } else {
+          console.warn(`No setID method on`, cls-1);
+        }
+      }
+      
         // Loop through the components in the saved data
         savedData.components.forEach(componentData => {
             const { id, instance, connectors } = componentData;
@@ -854,6 +957,7 @@ function loadCircuit(savedDataString) {
             // Build the component
             const componentID = componentInstance.name;
             componentMap.set(componentID, {
+                name: componentInstance.name,
                 instance: componentInstance,
                 connectors: [], // Connectors will be rebuilt below
                 connections: [], // Connections will be restored later
@@ -871,12 +975,21 @@ function loadCircuit(savedDataString) {
             }
 
             connectors.forEach(connectorData => {
-                const connector = document.createElement("button");
-                connector.id = connectorData.id;
-                const componentID = componentInstance.name;
-                connectorData.classList.forEach(cls => connector.classList.add(cls));
-                componentMap.get(componentID).connectors.push(connector);
-            });
+              const connector = document.createElement("button");
+              connector.id = connectorData.id;
+              const componentID = componentInstance.name;
+              connectorData.classList.forEach(cls => connector.classList.add(cls));
+              componentMap.get(componentID).connectors.push(connector);
+          
+              const componentElement = document.getElementById(`component-${componentID}`);
+              if (componentElement) {
+                  componentElement.appendChild(connector);
+              } else {
+                  console.warn(`Component element not found in DOM for ID: component-${componentID}`);
+              }
+          });
+          
+          
             console.log("componentMap in loadCircuit:", componentMap);
 
             componentInstance.updateInfoBox();
@@ -947,7 +1060,7 @@ function loadCircuit(savedDataString) {
           }
           
         console.log("Circuit loaded successfully.");
-        console.log(componentMap);
+        console.log("componentMap in loadCircuit:", componentMap);
     } catch (error) {
         console.error("Error loading circuit data:", error);
     }

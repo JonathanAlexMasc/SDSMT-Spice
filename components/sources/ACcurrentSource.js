@@ -1,9 +1,13 @@
 // Class for Voltage Source, extends Entities
 class ACcurrentSource extends Entities {
-    static CurrentSrcID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "I" + ++ACcurrentSource.CurrentSrcID; // Unique name for each Volt instance
+        this.name = "I" + ++ACcurrentSource.id; // Unique name for each Volt instance
         this.imgSrc = "images/Voltage/CurrentSources/Sine_Curr.svg";        // Image path for Volt
         this.x = posx;
         this.y = posy;
@@ -168,7 +172,7 @@ class ACcurrentSource extends Entities {
 
 
     static resetID() {
-        ACcurrentSource.CurrentSrcID = 0;
+        ACcurrentSource.id = 0;
     }
 }
 

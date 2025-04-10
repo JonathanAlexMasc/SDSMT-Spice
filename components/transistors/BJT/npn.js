@@ -1,15 +1,19 @@
 class NPN extends BaseTransistor {
-    static NPN_ID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
         this.x = posx;
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "QNPN" + ++NPN.NPN_ID;
+        this.name = "QNPN" + ++NPN.id;
         this.imgSrc = "images/Transistor/NPN_BJT_Transistor_5W.svg";
         
-        this.modelName = `QNPN_model_${NPN.NPN_ID}`
+        this.modelName = `QNPN_model_${NPN.id}`
         this.info = this.modelName;
         this.equation = this.name;
         this.Currconnections = [];
@@ -31,7 +35,7 @@ class NPN extends BaseTransistor {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `npnModal${NPN.NPN_ID}`;
+        modal.id = `npnModal${NPN.id}`;
         modal.tabIndex = -1;
 
         modal.innerHTML = `
@@ -123,7 +127,7 @@ class NPN extends BaseTransistor {
     }
 
     static resetID() {
-        NPN.NPN_ID = 0;
+        NPN.id = 0;
     }
 }
 

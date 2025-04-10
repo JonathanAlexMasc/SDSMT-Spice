@@ -1,8 +1,12 @@
 class PNP extends BaseTransistor {
-    static PNP_ID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "QPNP" + ++PNP.PNP_ID; // Q is the convention name used in ngspice to represent a bipolar junction transistor
+        this.name = "QPNP" + ++PNP.id; // Q is the convention name used in ngspice to represent a bipolar junction transistor
         this.imgSrc = "images/Transistor/PNP_BJT_Transistor_5W.svg";
         this.x = posx;
         this.y = posy;
@@ -10,7 +14,7 @@ class PNP extends BaseTransistor {
         this.intY = parseInt(this.y, 10);
         this.numInCons = 1;
         this.numOutCons = 2;
-        this.modelName = `QPNP_model_${PNP.PNP_ID}`
+        this.modelName = `QPNP_model_${PNP.id}`
         this.info = this.modelName;
         this.equation = this.name;
         this.Currconnections = [];
@@ -32,7 +36,7 @@ class PNP extends BaseTransistor {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `pnpModal${PNP.PNP_ID}`;
+        modal.id = `pnpModal${PNP.id}`;
         modal.tabIndex = -1;
 
         modal.innerHTML = `
@@ -124,7 +128,7 @@ class PNP extends BaseTransistor {
     }
 
     static resetID() {
-        PNP.PNP_ID = 0;
+        PNP.id = 0;
     }
 }
 

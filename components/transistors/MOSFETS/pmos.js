@@ -1,14 +1,18 @@
 class PMOS extends BaseTransistor {
-    static PMOS_ID = 0;
+    static id = 0;
+
+    static setID(value) {
+        this.id = value;
+    }
     constructor(posx = '500px', posy = '500px') {
         super();
         this.x = posx;
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "QPMOS" + ++PMOS.PMOS_ID; // "Q" is used for transistors in ngspice
+        this.name = "QPMOS" + ++PMOS.id; // "Q" is used for transistors in ngspice
         this.imgSrc = "images/Transistor/P-Channel_MOSFET_5W.svg";
-        this.modelName = `QPMOS_model_${PMOS.PMOS_ID}`;
+        this.modelName = `QPMOS_model_${PMOS.id}`;
         this.info = this.modelName;
         this.equation = this.name;
         this.Currconnections = [];
@@ -33,7 +37,7 @@ class PMOS extends BaseTransistor {
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `pmosModal${PMOS.PMOS_ID}`;
+        modal.id = `pmosModal${PMOS.id}`;
         modal.tabIndex = -1;
         modal.innerHTML = `
         <style>
@@ -131,7 +135,7 @@ class PMOS extends BaseTransistor {
     }
 
     static resetID() {
-        PMOS.PMOS_ID = 0;
+        PMOS.id = 0;
     }
 }
 

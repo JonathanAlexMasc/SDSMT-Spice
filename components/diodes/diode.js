@@ -1,5 +1,8 @@
 export class Diode extends BaseDiode {
-    static diodeID = 0;
+    static id = 0;
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
@@ -7,9 +10,9 @@ export class Diode extends BaseDiode {
         this.y = posy;
         this.intX = parseInt(this.x, 10);
         this.intY = parseInt(this.y, 10);
-        this.name = "D" + ++Diode.diodeID;
+        this.name = "D" + ++Diode.id;
         this.imgSrc = "images/Diode/diode.svg";
-        this.modelName = `D_MODEL_${Diode.diodeID}`;
+        this.modelName = `D_MODEL_${Diode.id}`;
         this.info = this.modelName;
         this.equation = this.name;
         this.Currconnections = [];
@@ -27,13 +30,13 @@ export class Diode extends BaseDiode {
     }
 
     static resetID() {
-        Diode.diodeID = 0;
+        Diode.id = 0;
     }
 
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `diodeModal${Diode.diodeID}`;
+        modal.id = `diodeModal${Diode.id}`;
         modal.tabIndex = -1;
         modal.innerHTML = `
     <style>

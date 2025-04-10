@@ -1,9 +1,12 @@
 export class Thyristor extends Entities {
-    static THYRISTOR_ID = 0;
+    static id = 0;
+    static setID(value) {
+        this.id = value;
+    }
 
     constructor(posx = '500px', posy = '500px') {
         super();
-        this.name = "Thyristor" + ++Thyristor.THYRISTOR_ID;
+        this.name = "Thyristor" + ++Thyristor.id;
         this.imgSrc = "images/Diode/diode.svg"; // Adjust with appropriate image path
         this.x = posx;
         this.y = posy;
@@ -12,7 +15,7 @@ export class Thyristor extends Entities {
         this.numInCons = 1;
         this.numOutCons = 1;
         this.Currconnections = [];
-        this.modelName = `Thyristor_MODEL_${Thyristor.THYRISTOR_ID}`;
+        this.modelName = `Thyristor_MODEL_${Thyristor.id}`;
         this.info = this.modelName;
         this.equation = this.name;
 
@@ -75,13 +78,13 @@ export class Thyristor extends Entities {
     }
 
     static resetID() {
-        Thyristor.THYRISTOR_ID = 0;
+        Thyristor.id = 0;
     }
 
     displayModifiableValues() {
         const modal = document.createElement('div');
         modal.classList.add('modal', 'fade');
-        modal.id = `ThyristorModal${Thyristor.THYRISTOR_ID}`;
+        modal.id = `ThyristorModal${Thyristor.id}`;
         modal.tabIndex = -1;
 
         modal.innerHTML = `
