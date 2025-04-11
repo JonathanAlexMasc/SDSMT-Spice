@@ -851,90 +851,48 @@ function loadCircuit(savedDataString) {
         if (!grid) {
             throw new Error("Grid or circuit canvas element is missing in the DOM.");
         }
-
-        // Step 1: Scan all component IDs to update their type counters
-        const classMaxIds = new Map(); // Class => max number
-
-        savedData.components.forEach(({ id }) => {
-          const match = id.match(/^([A-Za-z]+)(\d+)$/);
-          if (!match) {
-            console.warn("Component ID format invalid:", id);
-            return;
-          }
-
-          const [ , prefix, numStr ] = match;
-          const num = parseInt(numStr, 10);
-
-          const cls = getComponentClass(id); // ← very important
-          if (!cls) {
-            console.warn("No class found for ID:", id);
-            return;
-          }
-
-          const currentMax = classMaxIds.get(cls) || 0;
-          if (num > currentMax) {
-            classMaxIds.set(cls, num);
-          }
-        });
-
-
-      // Step 2: Update component IDs
-
-
-        const typeToClassMap = {
-          R: window.Resistor,
-          L: window.Inductor,
-          C: window.Capacitor,
-          V: window.Volt,
-          VD: window.DCVolt,
-          I: window.DCCURR,
-          AC: window.ACcurrentSource,
-          G: window.Gnd,
-          D: window.Diode,
-          Z: window.Zener,
-          LED: window.LED,
-          NPN: window.NPN,
-          PNP: window.PNP,
-          NJFET: window.NJFET,
-          PJFET: window.PJFET,
-          NMOS: window.NMOS,
-          PMOS: window.PMOS,
-          T: window.Thyristor,
-          xU: window.OPAMP,
-          // Add more if you have more types
-      };
       
-      for (const [cls, max] of classMaxIds.entries()) {
-        if (typeof cls.setID === 'function') {
-          console.log(`Setting ID for ${cls.name} to ${max}`);
-          cls.setID(max-1);
-        } else {
-          console.warn(`No setID method on`, cls-1);
-        }
-      }
-      
-        // Loop through the components in the saved data
-        savedData.components.forEach(componentData => {
+          // Loop through the components in the saved data
+          savedData.components.forEach(componentData => {
             const { id, instance, connectors } = componentData;
-
-            // Validate component structure
+          
             if (!id || !instance || !connectors) {
-                console.warn("Invalid component data:", componentData);
-                return;
+              console.warn("Invalid component data:", componentData);
+              return;
             }
-
-            // Dynamically create the appropriate component instance
-            const { name, imgSrc, x, y, numInCons, numOutCons, info, model, subckt, equation, blockedNodes, rotation } = instance;
-
-            const componentClass = getComponentClass(name); // Dynamically resolve the class based on the name
+          
+            const {
+              name, imgSrc, x, y,
+              numInCons, numOutCons, info,
+              model, subckt, equation, blockedNodes, rotation
+            } = instance;
+          
+            // Extract prefix and number from component ID like "R7"
+            const match = id.match(/^([A-Za-z]+)(\d+)$/);
+            if (!match) {
+              console.warn("Component ID format invalid:", id);
+              return;
+            }
+          
+            const [ , prefix, numStr ] = match;
+            const num = parseInt(numStr, 10);
+          
+            // Get the component class based on the name
+            const componentClass = getComponentClass(name);
             if (!componentClass) {
-                console.warn(`Unknown component type: ${name}`);
-                return;
+              console.warn(`Unknown component type: ${name}`);
+              return;
             }
-
+          
+            // Set the static counter to the correct value BEFORE creating the instance
+            if (typeof componentClass.setID === "function") {
+              componentClass.setID(num-1);
+            }
+          
+            // Now create the component using that ID
             const componentInstance = new componentClass(x, y);
-
-            // Restore instance properties
+          
+            // Override the name so it's exactly what was saved
             componentInstance.info = info;
             componentInstance.equation = equation;
             componentInstance.numInCons = numInCons;
@@ -997,7 +955,6 @@ function loadCircuit(savedDataString) {
         });
        
         
-        const processedConnections = new Set();
         const connectionPairs = []; // Store pairs for easier wire creation
         
         // First loop: Collect potential connections
