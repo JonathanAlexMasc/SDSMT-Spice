@@ -247,17 +247,17 @@ function deleteComponent(componentId) {
       }
     });
 
-    const holder = document.getElementById(`holder_${componentId}`);
-    if (holder && holder.parentNode) {
-      holder.parentNode.removeChild(holder);
-    }
-    
     // Remove the component button from the DOM
     const button = document.getElementById('component-button-' + componentId);
     removeFABForComponent(button);
     if (button && button.parentNode) {
         button.parentNode.removeChild(button);
     } 
+
+    const holder = document.getElementById(`holder_${componentId}`);
+    if (holder && holder.parentNode) {
+      holder.parentNode.removeChild(holder);
+    }
     
     // Remove connectors from the DOM
     connectors.forEach(connector => {
@@ -1079,23 +1079,6 @@ function clearCircuit() {
         deleteComponent(componentId);
     });
 
-    // Remove all remaining wire elements from the DOM
-    groupMap.forEach(wire => {
-        if (wire.path) {
-            wire.path.remove();
-        }
-    });
-    groupMap.length = 0; // Clear the wires array
-
-    // Remove all components from the DOM
-    componentMap.forEach((component, componentId) => {
-        // Remove component element
-        const componentElement = document.getElementById('component-button-' + componentId);
-        if (componentElement) {
-            componentElement.remove();
-        }
-    });
-    
     groupMap.clear();
     componentMap.clear(); // Clear the component map
     probeMap.clear();
