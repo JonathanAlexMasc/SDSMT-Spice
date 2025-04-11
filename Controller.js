@@ -236,31 +236,6 @@ function deleteComponent(componentId) {
     clearWiresFromComponent(componentId);
 
     
-
-    
-    // Remove connectors from the DOM
-    connectors.forEach(connector => {
-      console.log("Deleting connector: ", connector);
-        if (connector && connector.parentNode) {
-            connector.parentNode.removeChild(connector);
-        }
-        document.getElementById(connector.id)?.remove();  // Ensure no duplicates
-    });
-    connectors.length = 0;
-
-    // Remove the component button from the DOM
-    const button = document.getElementById('component-button-' + componentId);
-    removeFABForComponent(button);
-    if (button && button.parentNode) {
-        button.parentNode.removeChild(button);
-    }
-
-    
-    holder = document.getElementById(`holder_${componentId}`);
-    if (holder && holder.parentNode) {
-      holder.parentNode.removeChild(holder);
-    }
-
     const keys = Array.from(probeMap.keys());
     keys.forEach(key => {
       if (key.includes(componentId)) {
@@ -271,6 +246,28 @@ function deleteComponent(componentId) {
         probeMap.delete(key);
       }
     });
+
+    const holder = document.getElementById(`holder_${componentId}`);
+    if (holder && holder.parentNode) {
+      holder.parentNode.removeChild(holder);
+    }
+    
+    // Remove the component button from the DOM
+    const button = document.getElementById('component-button-' + componentId);
+    removeFABForComponent(button);
+    if (button && button.parentNode) {
+        button.parentNode.removeChild(button);
+    } 
+    
+    // Remove connectors from the DOM
+    connectors.forEach(connector => {
+      console.log("Deleting connector: ", connector);
+        if (connector && connector.parentNode) {
+            connector.parentNode.removeChild(connector);
+        }
+        document.getElementById(connector.id)?.remove();  // Ensure no duplicates
+    });
+    connectors.length = 0;
 
     componentMap.delete(componentId);
     
