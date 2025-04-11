@@ -228,51 +228,40 @@ function fabListener(button, rotateButton, deleteButton, clearWiresButton, editB
 
 function deleteComponent(componentId) {
   console.log("ProbeMap before deletion: ", probeMap);
-    // Retrieve the component and its connectors
-    const componentData = componentMap.get(componentId);
-    if (!componentData) return;
 
-    const { Button, connectors } = componentData;
-    clearWiresFromComponent(componentId);
+  const componentData = componentMap.get(componentId);
+  if (!componentData) return;
 
-    
-    const keys = Array.from(probeMap.keys());
-    keys.forEach(key => {
-      if (key.includes(componentId)) {
-        console.log(`Deleting probe key: ${key} (associated with ${componentId})`);
-        // Delete its paired probe (if it exists)
-        deleteProbePair(key);
-        
-        probeMap.delete(key);
-      }
-    });
+  const { Button, connectors } = componentData;
+  clearWiresFromComponent(componentId);
 
-    // Remove the component button from the DOM
-    const button = document.getElementById('component-button-' + componentId);
-    removeFABForComponent(button);
-    if (button && button.parentNode) {
-        button.parentNode.removeChild(button);
-    } 
-
-    const holder = document.getElementById(`holder_${componentId}`);
-    if (holder && holder.parentNode) {
-      holder.parentNode.removeChild(holder);
+  // Remove probes related to this component
+  const keys = Array.from(probeMap.keys());
+  keys.forEach(key => {
+    if (key.includes(componentId)) {
+      console.log(`Deleting probe key: ${key} (associated with ${componentId})`);
+      deleteProbePair(key);
+      probeMap.delete(key);
     }
-    
-    // Remove connectors from the DOM
-    connectors.forEach(connector => {
-      console.log("Deleting connector: ", connector);
-        if (connector && connector.parentNode) {
-            connector.parentNode.removeChild(connector);
-        }
-        document.getElementById(connector.id)?.remove();  // Ensure no duplicates
-    });
-    connectors.length = 0;
+  });
 
-    componentMap.delete(componentId);
-    
-    console.log("ProbeMap after deletion: ", probeMap);
+  // Then remove the component button
+  const button = document.getElementById('component-button-' + componentId);
+  removeFABForComponent(button);
+  if (button && button.parentNode) {
+    button.parentNode.removeChild(button);
+  }
+
+  // Finally remove the holder
+  const holder = document.getElementById(`holder_${componentId}`);
+  if (holder && holder.parentNode) {
+    holder.parentNode.removeChild(holder);
+  }
+
+  componentMap.delete(componentId);
+  console.log("ProbeMap after deletion: ", probeMap);
 }
+
 
 function deleteProbePair(probeKey) {
   const regex = /(.+?)-(.+?)-(VoltProbe\d+)$/;
