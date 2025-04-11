@@ -234,6 +234,9 @@ function deleteComponent(componentId) {
 
     const { Button, connectors } = componentData;
     clearWiresFromComponent(componentId);
+
+    
+
     
     // Remove connectors from the DOM
     connectors.forEach(connector => {
@@ -252,12 +255,11 @@ function deleteComponent(componentId) {
         button.parentNode.removeChild(button);
     }
 
-    // Remove the component holder (if any)
-    const holder = button ? button.parentNode : null;
+    
+    holder = document.getElementById(`holder_${componentId}`);
     if (holder && holder.parentNode) {
-        holder.parentNode.removeChild(holder);
+      holder.parentNode.removeChild(holder);
     }
-
 
     const keys = Array.from(probeMap.keys());
     keys.forEach(key => {
