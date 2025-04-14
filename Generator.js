@@ -333,7 +333,7 @@ function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
         });
 
         nodeValCurrMap.forEach((_, nodeVal) => {  // We don't need the value, just the key (nodeVal)
-            printLines += `print ${nodeVal}\n`;
+            printLines += `print I(${nodeVal})\n`;
         });
         return printLines;
     }
@@ -391,7 +391,7 @@ function makePrintLines(voltProbes, currentProbes, controlSectionSwitch) {
                 continue;
             }
             else {
-                printLines += `print ${currentProbes[i]}\n`;
+                printLines += `print I(${currentProbes[i]})\n`;
             }
         }
         return printLines;
@@ -512,6 +512,8 @@ async function ModifyNetlist(filePath) {
             if (probe.startsWith("V(")) {
                 vProbes.push(probe.match(/\d+/g)[0]); // Extract just the number
             } else if (probe.startsWith("I(")) {
+                //grab whats inside I(C1)
+                probe = probe.match(/\((.*?)\)/)[1];
                 iProbes.push(probe);
             }
         });
@@ -844,6 +846,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const output = await window.electron.simulateCircuit(filePath);
                     let rawOutput = output
                     RawData = rawOutput;
+                    console.log(rawOutput);
                     switch (plotType) {
                         case 'Transient':
                             cleanedOutput = parseTransData(rawOutput);
@@ -853,6 +856,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                             else if (outPutType == 'Graph') {
                                 console.log('Graph');
+                                console.log(cleanedOutput);
                                 plotTransient(cleanedOutput); //graph
                             }
                             break;
@@ -1077,7 +1081,7 @@ function parseTransData(output) {
         console.log("Stored Final Section:", assignedHeader, infoStorage);
     }
 
-    //console.log("Final Parsed Data:", dataStore);
+    console.log("Final Parsed Data:", dataStore);
     return dataStore;
 }
 
