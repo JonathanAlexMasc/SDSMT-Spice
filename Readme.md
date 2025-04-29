@@ -1,3 +1,128 @@
+# Overall Design
+
+The program follows a simple path:
+
+- **Create**
+- **Simulate**
+- **Edit**
+- **Simulate**
+
+First, you create a circuit, then simulate it, make any changes you want, and continue simulating or building new circuits.
+
+For more detailed information, refer to the **Build** and **Simulation** tabs.
+
+The program uses **JavaScript/HTML/CSS** and the **Electron** framework for page management and **NGSpice** as the simulation backend.
+
+---
+
+# Compile
+
+You can build and compile the program for both development and production.
+
+Navigate to the main `SDSMT-Spice` directory and use any of these commands:
+
+```json
+"scripts": {
+  "test": "playwright test",
+  "start": "electron-forge start",
+  "dev": "electron . start",
+  "make": "electron-forge make",
+  "package": "electron-forge package",
+  "wdio": "wdio run ./wdio.conf.js",
+  "publish": "electron-forge publish"
+}
+```
+
+### Example Commands:
+- `npm run dev`
+- `npm run start`
+- `npm run make`
+
+### What They Do:
+- **Dev**: Starts the app without Electron Forge. Fast and easy for development. Uses direct pathing (modify paths cautiously).
+- **Start**: Runs the app through Electron Forge. May have issues with pathing.
+- **Make**: Compiles the program, creating executables and zipped files. Takes several seconds to a minute.
+
+### ⚠️ WARNING
+
+There is a **known issue** with pathing when using `make`, `start`, or `dev`.
+
+> **If running in development mode:**  
+> Change the path in `loader.js` (`simulate-circuit` function).  
+> 
+> - For **development**: use `__dirname`
+> - For **production**: use `process.resourcesPath`
+
+Uncomment/comment the relevant `ngspice` path for Windows/Linux. (Mac users are unaffected.)
+
+---
+
+# Electron
+
+Check the **Electron** tab for additional information.
+
+**Why Electron?**  
+It enables production and app development using JavaScript, which the team was familiar with.
+
+### Advantages:
+- Dedicated environment simplifies production and auto-updating for users.
+- Almost identical to standard web development with JavaScript/HTML.
+
+### Disadvantages:
+- External libraries can be tricky to import unless Electron-compatible.
+- Libraries must be imported via `Loader.js`, not directly in the files that use them.
+
+---
+
+# Main Pages
+
+## Build Page
+
+**Quick Overview** — For a detailed breakdown, see the **Build** tab.
+
+- **Controlled by**: `controller.js`
+- **Parent Class**: `Entities.js`
+  - ⚠️ Editing `Entities.js` affects **all classes**.
+
+### Adding a New Component:
+1. Create an HTML button → Call `AddXComponent`
+2. Create a new class extending `Entities`, export it.
+3. Import the new class into `BuildModule.js`.
+
+### Important Files:
+- **Classes.js**: Supporting classes (connector, wire, probe).
+- **Floating.js**: Modifies the floating action buttons (FABs) for each component.
+- **Wires.js**: Manages the wire pathing algorithm.
+
+---
+
+## Run Page
+
+**Quick Overview** — For a detailed breakdown, see the **Run** tab.
+
+- **Main Controller**: `generator.js`
+- **No extra files** — all logic is in `generator.js`.
+
+### Data Flow:
+- Receive netlist (from build or external).
+- Verify netlist.
+- Add/Edit simulation options.
+- Simulate.
+- Plot/Table results.
+
+### Important Functions:
+- **ModifyNetlist()**:  
+  Central handler for all netlist modifications.
+
+- **Parse Functions**:  
+  Separate parse functions for each sweep type (for compartmentalization).
+
+- **Plot Functions**:  
+  Individual functions for each simulation type (you could consolidate this if desired).
+
+---
+
+
 # Electron in Habanero SPICE
 
 ## Overview
